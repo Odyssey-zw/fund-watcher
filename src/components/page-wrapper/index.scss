@@ -1,0 +1,43 @@
+.page-wrapper {
+  min-height: 100%;
+  padding: 0;
+  padding-top: calc(constant(safe-area-inset-top, 44px) + 8px);
+  padding-top: calc(env(safe-area-inset-top, 44px) + 8px);
+  padding-right: constant(safe-area-inset-right, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  box-sizing: border-box;
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 88rpx;
+    background-color: #fff;
+    border-bottom: 1rpx solid #eee;
+
+    &.header-centered {
+      text-align: center;
+    }
+
+    &.header-default {
+      padding: 0 30rpx;
+      justify-content: flex-start;
+    }
+
+    .page-title {
+      font-size: 36rpx;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+
+  .page-content {
+    min-height: calc(100vh - 88rpx);
+    padding: 30rpx;
+    box-sizing: border-box;
+
+    &.no-padding {
+      padding: 0;
+    }
+  }
+}

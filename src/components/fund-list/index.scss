@@ -1,26 +1,5 @@
-.fund-list-component {
-  min-height: 100%;
-  background-color: #fff;
+.fund-list-content {
   padding: 0;
-  padding-top: calc(constant(safe-area-inset-top, 44px) + 8px);
-  padding-top: calc(env(safe-area-inset-top, 44px) + 8px);
-  padding-right: constant(safe-area-inset-right, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
-
-  .fund-list-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 88rpx;
-    background-color: #fff;
-    border-bottom: 1rpx solid #eee;
-
-    .fund-list-title {
-      font-size: 36rpx;
-      font-weight: 600;
-      color: #333;
-    }
-  }
 
   /* Tab：全部 / 持有 / 已清仓 / 偏股 / 偏债 / 指数 */
   .fund-tabs {
