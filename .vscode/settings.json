@@ -1,0 +1,24 @@
+{
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.suggest.completeFunctionCalls": true,
+  "typescript.suggest.autoImports": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "prettier.requireConfig": true,
+  "files.associations": {
+    "*.wxml": "html",
+    "*.wxss": "css"
+  },
+  "emmet.includeLanguages": {
+    "wxml": "html"
+  }
+}
