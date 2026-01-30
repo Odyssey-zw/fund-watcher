@@ -110,6 +110,7 @@
   "dependencies": {
     "@babel/runtime": "^7.26.7",
     "@kirklin/reset-css": "^0.0.6",
+    "@nutui/nutui-react-taro": "3.0.19-cpp.25",
     "@tanstack/react-query": "^5.66.0",
     "@taro-hooks/plugin-react": "^2.1.0",
     "@taroify/core": "0.6.3-alpha.0",
@@ -130,6 +131,7 @@
     "@tarojs/shared": "4.0.9",
     "@tarojs/taro": "4.0.9",
     "abortcontroller-polyfill": "^1.7.8",
+    "classnames": "^2.5.1",
     "dayjs": "^1.11.13",
     "event-target-polyfill": "^0.0.4",
     "lodash-es": "^4.17.21",

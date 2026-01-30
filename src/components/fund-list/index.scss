@@ -3,13 +3,21 @@
 
   /* Tab：全部 / 持有 / 已清仓 / 偏股 / 偏债 / 指数 */
   .fund-tabs {
+    position: fixed;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
     padding: 24rpx 0 24rpx 24rpx;
+    padding-left: calc(24rpx + constant(safe-area-inset-left, 0px));
+    padding-left: calc(24rpx + env(safe-area-inset-left, 0px));
+    padding-right: calc(24rpx + constant(safe-area-inset-right, 0px));
+    padding-right: calc(24rpx + env(safe-area-inset-right, 0px));
     background-color: #fff;
     border-bottom: 1rpx solid #f0f0f0;
     overflow-x: auto;
+    z-index: 99;
 
     .fund-tab {
       flex-shrink: 0;
@@ -55,12 +63,12 @@
   .fund-table-header {
     display: flex;
     align-items: flex-end;
-    padding: 20rpx 24rpx 16rpx;
+    padding: 20rpx 24rpx 16rpx 24rpx;
     background-color: #fafafa;
     border-bottom: 1rpx solid #eee;
     font-size: 24rpx;
     color: #999;
-    min-width: 1000rpx;
+    min-width: 600rpx;
 
     .fund-th {
       display: flex;
@@ -73,7 +81,10 @@
       }
 
       &.fund-th-name {
-        width: 200rpx;
+        width: 50%;
+        flex: 0 0 50%;
+        min-width: 0;
+        max-width: 50%;
       }
 
       &.fund-th-num {
@@ -114,7 +125,7 @@
     }
 
     .fund-table-body {
-      min-width: 1000rpx;
+      min-width: 600rpx;
 
       .fund-row {
         display: flex;
@@ -122,7 +133,7 @@
         padding: 28rpx 24rpx 28rpx 24rpx;
         border-bottom: 1rpx solid #f0f0f0;
         background-color: #fff;
-        min-width: 1000rpx;
+        min-width: 600rpx;
 
         &:active {
           background-color: #f9f9f9;
@@ -130,8 +141,10 @@
       }
 
       .fund-row-left {
-        width: 200rpx;
-        flex-shrink: 0;
+        width: 50%;
+        flex: 0 0 50%;
+        min-width: 0;
+        max-width: 50%;
         margin-right: 20rpx;
       }
 

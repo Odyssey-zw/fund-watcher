@@ -1,26 +1,31 @@
 .page-wrapper {
   min-height: 100%;
   padding: 0;
-  padding-top: calc(constant(safe-area-inset-top, 44px) + 8px);
-  padding-top: calc(env(safe-area-inset-top, 44px) + 8px);
-  padding-right: constant(safe-area-inset-right, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
   box-sizing: border-box;
 
   .page-header {
+    position: fixed;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 88rpx;
     background-color: #fff;
     border-bottom: 1rpx solid #eee;
+    z-index: 100;
+    padding-left: constant(safe-area-inset-left, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: constant(safe-area-inset-right, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
 
     &.header-centered {
       text-align: center;
     }
 
     &.header-default {
-      padding: 0 30rpx;
+      padding-left: 30rpx;
+      padding-right: 30rpx;
       justify-content: flex-start;
     }
 
@@ -28,6 +33,10 @@
       font-size: 36rpx;
       font-weight: 600;
       color: #333;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 

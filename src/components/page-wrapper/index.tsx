@@ -27,10 +27,20 @@ export default function PageWrapper({
   useEffect(() => {
     try {
       const windowInfo = Taro.getWindowInfo();
-      const height =
-        windowInfo.statusBarHeight ?? windowInfo.safeArea?.top ?? 0;
-      setTopSafeHeight(Number(height) || 0);
-    } catch {
+      const systemInfo = Taro.getSystemInfoSync();
+      // statusBarHeight 是 px 单位，需要转换为 rpx
+      // 1px = 2rpx (假设设计稿是 750rpx = 375px)
+      // 优先使用 statusBarHeight，如果没有则使用 safeArea.top
+      const statusBarHeight =
+        windowInfo.statusBarHeight ??
+        systemInfo.statusBarHeight ??
+        windowInfo.safeArea?.top ??
+        systemInfo.safeArea?.top ??
+        0;
+      const height = statusBarHeight * 2;
+      setTopSafeHeight(Math.max(Number(height) || 0, 0));
+    } catch (error) {
+      console.warn("Failed to get safe area height:", error);
       setTopSafeHeight(0);
     }
   }, []);
@@ -39,7 +49,6 @@ export default function PageWrapper({
     <View
       className={`page-wrapper ${className}`}
       style={{
-        paddingTop: topSafeHeight > 0 ? `${topSafeHeight + 8}px` : undefined,
         backgroundColor,
       }}
     >
@@ -48,6 +57,9 @@ export default function PageWrapper({
           className={`page-header ${
             headerStyle === "default" ? "header-default" : "header-centered"
           }`}
+          style={{
+            top: `${topSafeHeight}rpx`,
+          }}
         >
           <Text className="page-title">{title}</Text>
         </View>

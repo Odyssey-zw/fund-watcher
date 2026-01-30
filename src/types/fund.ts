@@ -106,6 +106,8 @@ export interface FundSearchResult {
   estimateValue?: number;
   /** 估值涨跌幅（百分比） */
   estimateChange?: number;
+  /** 估值时间 */
+  estimateTime?: string;
   /** 添加后收益（百分比或金额） */
   returnAfterAddition?: number;
   /** 添加时长（天） */

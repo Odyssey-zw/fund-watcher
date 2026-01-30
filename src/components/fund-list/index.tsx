@@ -41,10 +41,14 @@ export default function FundList() {
     "unitValue",
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [topSafeHeight, setTopSafeHeight] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const loadFunds = async (page: number = currentPage) => {
+  const loadFunds = async (page: number = currentPage, isRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isRefresh) {
+        setLoading(true);
+      }
       const response = await getHotFunds({ page, pageSize: 20 });
       if (response.success) {
         if (page === 1) {
@@ -67,11 +71,35 @@ export default function FundList() {
       }
     } finally {
       setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      }
     }
   };
 
   useEffect(() => {
     loadFunds(1);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const windowInfo = Taro.getWindowInfo();
+      const systemInfo = Taro.getSystemInfoSync();
+      // statusBarHeight 是 px 单位，需要转换为 rpx
+      // 1px = 2rpx (假设设计稿是 750rpx = 375px)
+      // 优先使用 statusBarHeight，如果没有则使用 safeArea.top
+      const statusBarHeight =
+        windowInfo.statusBarHeight ??
+        systemInfo.statusBarHeight ??
+        windowInfo.safeArea?.top ??
+        systemInfo.safeArea?.top ??
+        0;
+      const height = statusBarHeight * 2;
+      setTopSafeHeight(Math.max(Number(height) || 0, 0));
+    } catch (error) {
+      console.warn("Failed to get safe area height:", error);
+      setTopSafeHeight(0);
+    }
   }, []);
 
   useEffect(() => {
@@ -118,9 +146,10 @@ export default function FundList() {
     });
   }, [funds, activeTab, sortBy, sortOrder]);
 
-  const handlePullDownRefresh = () => {
+  const handlePullDownRefresh = async () => {
+    setRefreshing(true);
     setCurrentPage(1);
-    loadFunds(1);
+    await loadFunds(1, true);
   };
 
   const handleReachBottom = () => {
@@ -136,8 +165,18 @@ export default function FundList() {
       headerStyle="centered"
       contentPadding={false}
     >
-      <View className="fund-list-content">
-        <View className="fund-tabs">
+      <View
+        className="fund-list-content"
+        style={{
+          paddingTop: `${topSafeHeight + 176}rpx`, // 安全区域 + 标题(88) + 标签栏(88)
+        }}
+      >
+        <View
+          className="fund-tabs"
+          style={{
+            top: `${topSafeHeight + 88}rpx`, // 安全区域 + 标题高度
+          }}
+        >
           {TABS.map(tab => (
             <View
               key={tab.key}
@@ -156,7 +195,7 @@ export default function FundList() {
           className="fund-list-container"
           scrollY
           refresherEnabled
-          refresherTriggered={false}
+          refresherTriggered={refreshing}
           onRefresherRefresh={handlePullDownRefresh}
           onScrollToLower={handleReachBottom}
         >
@@ -168,7 +207,10 @@ export default function FundList() {
             <ScrollView className="fund-table-wrapper" scrollX>
               <View className="fund-table-header">
                 <View className="fund-th fund-th-name">
-                  <Text>基金名称</Text>
+                  <View>
+                    <Text>基金名称</Text>
+                    <Text className="fund-th-date-placeholder"></Text>
+                  </View>
                 </View>
                 <View
                   className="fund-th fund-th-num"
@@ -201,31 +243,6 @@ export default function FundList() {
                       <ArrowUp />
                     )
                   ) : null}
-                </View>
-                <View
-                  className="fund-th fund-th-return"
-                  onClick={() => handleSort("return")}
-                >
-                  <View>
-                    <Text>添加后收益</Text>
-                    <Text className="fund-th-sub">添加时长</Text>
-                  </View>
-                  {sortBy === "return" ? (
-                    sortOrder === "desc" ? (
-                      <ArrowDown />
-                    ) : (
-                      <ArrowUp />
-                    )
-                  ) : null}
-                </View>
-                <View className="fund-th fund-th-rate">
-                  <Text>近1周</Text>
-                </View>
-                <View className="fund-th fund-th-rate">
-                  <Text>近1月</Text>
-                </View>
-                <View className="fund-th fund-th-rate">
-                  <Text>近6月</Text>
                 </View>
               </View>
               <View className="fund-table-body">

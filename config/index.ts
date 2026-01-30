@@ -50,7 +50,9 @@ export default defineConfig(async merge => {
       postcss: {
         pxtransform: {
           enable: true,
-          config: {},
+          config: {
+            selectorBlackList: ["nut-"], // 防止 NutUI 组件样式中的 px 被转换为 rpx
+          },
         },
         url: {
           enable: true,
@@ -119,6 +121,46 @@ export default defineConfig(async merge => {
       webpackChain(chain) {
         chain.resolve.plugin("tsconfig-paths").use(TsconfigPathsPlugin);
         chain.plugin("unocss").use(UnoCSS());
+
+        // 忽略来自 node_modules 的 Sass 弃用警告
+        chain.merge({
+          ignoreWarnings: [
+            {
+              module: /node_modules\/@taroify\/icons/,
+              message: /Sass @import rules are deprecated/,
+            },
+          ],
+        });
+
+        // 配置 sass-loader 忽略弃用警告
+        chain.module
+          .rule("scss")
+          .test(/\.scss$/)
+          .use("sass-loader")
+          .tap(options => {
+            return {
+              ...options,
+              sassOptions: {
+                ...(options?.sassOptions || {}),
+                silenceDeprecations: ["import"],
+              },
+            };
+          });
+
+        // 同样配置 sass 规则
+        chain.module
+          .rule("sass")
+          .test(/\.sass$/)
+          .use("sass-loader")
+          .tap(options => {
+            return {
+              ...options,
+              sassOptions: {
+                ...(options?.sassOptions || {}),
+                silenceDeprecations: ["import"],
+              },
+            };
+          });
       },
     },
     rn: {

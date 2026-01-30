@@ -8,10 +8,8 @@ import type {
   PaginationResult,
 } from "~/types/common";
 import type { FundDetail, FundSearchResult, FundValue } from "~/types/fund";
-
-// 新浪财经基金数据API端点
-const SINA_FUND_API_BASE = "https://api.fund.eastmoney.com";
-const SINA_FUND_INFO_API = "https://fundgz.1234567.com.cn";
+import Taro from "@tarojs/taro";
+import { HOT_FUND_CODES } from "~/constants/fund";
 
 /**
  * 搜索基金
@@ -257,149 +255,33 @@ export async function getHotFunds(
   params: PaginationParams,
 ): Promise<ApiResponse<PaginationResult<FundSearchResult>>> {
   try {
-    const mockFunds: FundSearchResult[] = [
-      {
-        code: "005911",
-        name: "广发双擎升级混合",
-        type: "hh",
-        unitValue: 2.3456,
-        dayGrowthRate: 2.34,
-        estimateValue: 2.3512,
-        estimateChange: 0.24,
-        tags: ["持有", "跑赢赛道"],
-        returnAfterAddition: 13.01,
-        durationDays: 128,
+    console.log("[API] 开始获取热门基金数据...");
+
+    // 批量获取基金数据
+    const fundPromises = HOT_FUND_CODES.map(code => getSinaFundData(code));
+    const sinaDataList = await Promise.all(fundPromises);
+
+    // 转换为 FundSearchResult 格式
+    const funds: FundSearchResult[] = sinaDataList
+      .map(sinaData => convertSinaDataToFundSearchResult(sinaData))
+      .filter((fund): fund is FundSearchResult => fund !== null)
+      .map(fund => ({
+        ...fund,
+        // 保留一些模拟数据字段（这些需要从其他接口获取）
+        tags: [],
+        returnAfterAddition: undefined,
+        durationDays: undefined,
         currentValue: {
-          week1GrowthRate: 1.2,
-          month1GrowthRate: 3.5,
-          month6GrowthRate: 8.2,
+          // 这些数据需要从其他接口获取，暂时留空
         },
-      },
-      {
-        code: "002311",
-        name: "银华鑫盛灵活配置",
-        type: "hh",
-        unitValue: 1.8945,
-        dayGrowthRate: 1.87,
-        estimateValue: 1.9012,
-        estimateChange: 0.35,
-        tags: ["高夏普比率", "低回撤率"],
-        returnAfterAddition: -1.08,
-        durationDays: 45,
-        currentValue: {
-          week1GrowthRate: -0.5,
-          month1GrowthRate: 1.2,
-          month6GrowthRate: 2.8,
-        },
-      },
-      {
-        code: "161725",
-        name: "招商中证白酒指数",
-        type: "zs",
-        unitValue: 0.8912,
-        dayGrowthRate: -1.23,
-        estimateValue: 0.8898,
-        estimateChange: -0.15,
-        tags: ["指数型", "绩优规模小"],
-        returnAfterAddition: 5.62,
-        durationDays: 92,
-        currentValue: {
-          week1GrowthRate: -2.1,
-          month1GrowthRate: 0.8,
-          month6GrowthRate: 5.1,
-        },
-      },
-      {
-        code: "001632",
-        name: "天弘沪深300ETF联接",
-        type: "etf",
-        unitValue: 1.2345,
-        dayGrowthRate: 0.78,
-        estimateValue: 1.2368,
-        estimateChange: 0.19,
-        tags: ["跑赢偏股基"],
-        returnAfterAddition: 2.33,
-        durationDays: 60,
-        currentValue: {
-          week1GrowthRate: 0.6,
-          month1GrowthRate: 2.1,
-          month6GrowthRate: 4.3,
-        },
-      },
-      {
-        code: "003096",
-        name: "中欧医疗健康混合",
-        type: "hh",
-        unitValue: 2.789,
-        dayGrowthRate: -0.56,
-        estimateValue: 2.7756,
-        estimateChange: -0.48,
-        tags: ["持有", "低估有潜力"],
-        returnAfterAddition: -2.82,
-        durationDays: 30,
-        currentValue: {
-          week1GrowthRate: -1.2,
-          month1GrowthRate: -0.3,
-          month6GrowthRate: 1.5,
-        },
-      },
-      {
-        code: "000071",
-        name: "华夏回报混合",
-        type: "hh",
-        unitValue: 1.5678,
-        dayGrowthRate: 0.34,
-        estimateValue: 1.5692,
-        estimateChange: 0.09,
-        tags: ["持有"],
-        returnAfterAddition: 9.21,
-        durationDays: 156,
-        currentValue: {
-          week1GrowthRate: 0.9,
-          month1GrowthRate: 2.4,
-          month6GrowthRate: 6.8,
-        },
-      },
-      {
-        code: "110022",
-        name: "易方达消费行业",
-        type: "gp",
-        unitValue: 3.2109,
-        dayGrowthRate: 1.45,
-        estimateValue: 3.2234,
-        estimateChange: 0.39,
-        tags: ["偏股", "绩优规模小"],
-        returnAfterAddition: 8.15,
-        durationDays: 88,
-        currentValue: {
-          week1GrowthRate: 2.1,
-          month1GrowthRate: 4.2,
-          month6GrowthRate: 12.5,
-        },
-      },
-      {
-        code: "001593",
-        name: "天弘创业板ETF联接",
-        type: "etf",
-        unitValue: 1.1234,
-        dayGrowthRate: -2.1,
-        estimateValue: 1.1189,
-        estimateChange: -0.4,
-        tags: ["指数型"],
-        returnAfterAddition: -6.07,
-        durationDays: 22,
-        currentValue: {
-          week1GrowthRate: -3.2,
-          month1GrowthRate: -1.5,
-          month6GrowthRate: -2.8,
-        },
-      },
-    ];
+      }));
+
+    console.log(`[API] 成功获取 ${funds.length} 只基金数据`);
 
     // 实现分页
     const startIndex = (params.page - 1) * params.pageSize;
     const endIndex = startIndex + params.pageSize;
-    const paginatedData = mockFunds.slice(startIndex, endIndex);
+    const paginatedData = funds.slice(startIndex, endIndex);
 
     return {
       code: 200,
@@ -407,14 +289,15 @@ export async function getHotFunds(
       success: true,
       data: {
         list: paginatedData,
-        total: mockFunds.length,
+        total: funds.length,
         page: params.page,
         pageSize: params.pageSize,
-        totalPages: Math.ceil(mockFunds.length / params.pageSize),
+        totalPages: Math.ceil(funds.length / params.pageSize),
       },
     };
   } catch (error) {
     console.error("获取热门基金失败:", error);
+    // 失败时返回空列表
     return {
       code: 500,
       message: "获取热门基金失败",
@@ -474,6 +357,129 @@ export async function getFundRealTimeValues(
 }
 
 /**
+ * 从新浪财经获取单个基金数据
+ * @param fundCode 基金代码（如：005911）
+ * @returns 基金实时数据
+ */
+async function getSinaFundData(
+  fundCode: string,
+): Promise<any | null> {
+  try {
+    const sinaUrl = `https://fundgz.1234567.com.cn/js/${fundCode}.js`;
+    const response = await Taro.request({
+      url: sinaUrl,
+      method: "GET",
+      dataType: "text",
+      header: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const responseText = response.data as string;
+    if (typeof responseText === "string") {
+      const jsonMatch = responseText.match(/jsonpgz\((.*)\)/);
+      if (jsonMatch && jsonMatch[1]) {
+        try {
+          return JSON.parse(jsonMatch[1]);
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error(`获取基金${fundCode}数据失败:`, error);
+    return null;
+  }
+}
+
+/**
+ * 将新浪财经数据格式转换为 FundSearchResult
+ */
+function convertSinaDataToFundSearchResult(sinaData: any): FundSearchResult | null {
+  if (!sinaData || !sinaData.fundcode) {
+    return null;
+  }
+
+  // 从基金名称推断类型（简单处理）
+  const name = sinaData.name || "";
+  let type = "hh"; // 默认混合型
+  if (name.includes("指数") || name.includes("ETF")) {
+    type = "zs";
+  } else if (name.includes("股票") || name.includes("偏股")) {
+    type = "gp";
+  } else if (name.includes("债券") || name.includes("偏债")) {
+    type = "zq";
+  }
+
+  // 新浪财经 API 返回的 gszzl 已经是百分比格式（如 "1.61" 表示 1.61%）
+  // 需要除以 100 转换为小数格式，以便 formatPercentage 函数正确处理
+  const estimateChange = sinaData.gszzl
+    ? Number.parseFloat(sinaData.gszzl) / 100
+    : undefined;
+
+  return {
+    code: sinaData.fundcode,
+    name: sinaData.name || "",
+    type,
+    unitValue: sinaData.dwjz ? Number.parseFloat(sinaData.dwjz) : undefined,
+    estimateValue: sinaData.gsz ? Number.parseFloat(sinaData.gsz) : undefined,
+    estimateChange,
+    estimateTime: sinaData.gztime || undefined, // 估值时间，如 "2026-01-30 15:00"
+    // 注意：新浪财经 API 不直接提供日涨跌幅，需要从其他接口获取
+    dayGrowthRate: undefined,
+    tags: [],
+  };
+}
+
+/**
+ * 测试新浪财经 API 是否可用
+ * @param fundCode 基金代码（如：005911）
+ * @returns 基金实时数据
+ */
+export async function testSinaFundAPI(
+  fundCode: string,
+): Promise<ApiResponse<any>> {
+  try {
+    // 新浪财经基金实时估值 API
+    // 格式：https://fundgz.1234567.com.cn/js/{fundCode}.js
+    // 返回 JSONP 格式数据
+    const sinaUrl = `https://fundgz.1234567.com.cn/js/${fundCode}.js`;
+
+    console.log(`[测试] 尝试调用新浪财经 API: ${sinaUrl}`);
+    const jsonData = await getSinaFundData(fundCode);
+    console.log(`[测试] 新浪财经 API 响应:`, jsonData);
+
+    if (jsonData) {
+      return {
+        code: 200,
+        message: "success",
+        success: true,
+        data: jsonData,
+      };
+    }
+
+    return {
+      code: 500,
+      message: "API 调用失败",
+      success: false,
+      data: null,
+    };
+  } catch (error: any) {
+    console.error(`[测试] 获取基金${fundCode}实时数据失败:`, error);
+    return {
+      code: 500,
+      message: error?.message || "获取基金实时数据失败",
+      success: false,
+      data: {
+        error: error?.message || String(error),
+        stack: error?.stack,
+      },
+    };
+  }
+}
+
+/**
  * 使用代理从新浪财经获取基金实时数据
  * @param fundCode 基金代码
  * @returns 基金实时数据
@@ -482,47 +488,28 @@ export async function getFundRealTimeDataFromSina(
   fundCode: string,
 ): Promise<ApiResponse<any>> {
   try {
-    // 由于小程序环境限制，直接访问外部API会有跨域问题
-    // 在实际部署时，需要通过后端服务代理请求
-    // 以下是模拟请求的结构，实际实现需要后端支持
-    const proxyUrl = `/api/fund/${fundCode}`; // 这应该是你的后端代理地址
+    const sinaData = await getSinaFundData(fundCode);
+    if (sinaData) {
+      return {
+        code: 200,
+        message: "success",
+        success: true,
+        data: sinaData,
+      };
+    }
 
-    // 在实际应用中，这里应该发送请求到你自己的后端服务器
-    // 后端服务器再向新浪财经API发起请求并返回数据
-    // 示例：
-    /*
-    const response = await fetch(proxyUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const result = await response.json();
-    return result;
-    */
-
-    // 模拟数据，实际部署时应替换为真实的API调用
-    const mockResponse = {
-      fundcode: fundCode,
-      name: `基金${fundCode}`,
-      jzrq: new Date().toISOString().split("T")[0], // 基金净值日期
-      dwjz: (1.0 + (Math.random() * 0.5 - 0.1)).toFixed(4), // 单位净值
-      gszzl: (Math.random() * 4 - 2).toFixed(2), // 估算涨跌幅
-      gztime: new Date().toLocaleString(), // 估值时间
-    };
-
-    return {
-      code: 200,
-      message: "success",
-      success: true,
-      data: mockResponse,
-    };
-  } catch (error) {
-    console.error(`获取基金${fundCode}实时数据失败:`, error);
+    // 如果获取失败，返回错误
     return {
       code: 500,
       message: "获取基金实时数据失败",
+      success: false,
+      data: null,
+    };
+  } catch (error: any) {
+    console.error(`获取基金${fundCode}实时数据失败:`, error);
+    return {
+      code: 500,
+      message: error?.message || "获取基金实时数据失败",
       success: false,
       data: null,
     };
