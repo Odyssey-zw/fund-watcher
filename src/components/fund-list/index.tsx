@@ -8,7 +8,7 @@ import PageWrapper from "~/components/page-wrapper";
 import {
   formatFundValue,
   formatPercentage,
-  getTrendColorClass,
+  getTrendColorStyle,
 } from "~/utils/fundUtils";
 
 /** 顶部 Tab 选项 */
@@ -289,7 +289,8 @@ export default function FundList() {
                           {formatFundValue(fund.unitValue ?? 0)}
                         </Text>
                         <Text
-                          className={`text-24rpx leading-tight ${getTrendColorClass(fund.dayGrowthRate ?? 0)}`}
+                          className="text-24rpx leading-tight"
+                          style={getTrendColorStyle(fund.dayGrowthRate ?? 0)}
                         >
                           {fund.dayGrowthRate != null
                             ? formatPercentage(fund.dayGrowthRate)
@@ -303,7 +304,8 @@ export default function FundList() {
                             : "--"}
                         </Text>
                         <Text
-                          className={`text-24rpx leading-tight ${getTrendColorClass(fund.estimateChange ?? 0)}`}
+                          className="text-24rpx leading-tight"
+                          style={getTrendColorStyle(fund.estimateChange ?? 0)}
                         >
                           {fund.estimateChange != null
                             ? formatPercentage(fund.estimateChange)
@@ -312,7 +314,10 @@ export default function FundList() {
                       </View>
                       <View className="mr-20rpx w-120rpx flex flex-shrink-0 flex-col items-end justify-center">
                         <Text
-                          className={`fund-num ${getTrendColorClass(fund.returnAfterAddition ?? 0)}`}
+                          className="fund-num"
+                          style={getTrendColorStyle(
+                            fund.returnAfterAddition ?? 0,
+                          )}
                         >
                           {fund.returnAfterAddition != null
                             ? `${fund.returnAfterAddition >= 0 ? "+" : ""}${fund.returnAfterAddition.toFixed(2)}`
@@ -326,7 +331,14 @@ export default function FundList() {
                       </View>
                       <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
                         <Text
-                          className={`text-24rpx leading-tight ${fund.currentValue?.week1GrowthRate != null ? getTrendColorClass(fund.currentValue.week1GrowthRate) : ""}`}
+                          className="text-24rpx leading-tight"
+                          style={
+                            fund.currentValue?.week1GrowthRate != null
+                              ? getTrendColorStyle(
+                                  fund.currentValue.week1GrowthRate,
+                                )
+                              : {}
+                          }
                         >
                           {fund.currentValue?.week1GrowthRate != null
                             ? formatPercentage(
@@ -337,7 +349,14 @@ export default function FundList() {
                       </View>
                       <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
                         <Text
-                          className={`text-24rpx leading-tight ${fund.currentValue?.month1GrowthRate != null ? getTrendColorClass(fund.currentValue.month1GrowthRate) : ""}`}
+                          className="text-24rpx leading-tight"
+                          style={
+                            fund.currentValue?.month1GrowthRate != null
+                              ? getTrendColorStyle(
+                                  fund.currentValue.month1GrowthRate,
+                                )
+                              : {}
+                          }
                         >
                           {fund.currentValue?.month1GrowthRate != null
                             ? formatPercentage(
@@ -348,7 +367,14 @@ export default function FundList() {
                       </View>
                       <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
                         <Text
-                          className={`text-24rpx leading-tight ${fund.currentValue?.month6GrowthRate != null ? getTrendColorClass(fund.currentValue.month6GrowthRate) : ""}`}
+                          className="text-24rpx leading-tight"
+                          style={
+                            fund.currentValue?.month6GrowthRate != null
+                              ? getTrendColorStyle(
+                                  fund.currentValue.month6GrowthRate,
+                                )
+                              : {}
+                          }
                         >
                           {fund.currentValue?.month6GrowthRate != null
                             ? formatPercentage(

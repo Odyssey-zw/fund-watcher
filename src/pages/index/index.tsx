@@ -55,8 +55,9 @@ export default function Index() {
       const windowInfo = Taro.getWindowInfo();
 
       // 获取底部安全区域高度
-      const safeBottom = windowInfo.safeArea?.bottom ?
-        (windowInfo.screenHeight - windowInfo.safeArea.bottom) : 0;
+      const safeBottom = windowInfo.safeArea?.bottom
+        ? windowInfo.screenHeight - windowInfo.safeArea.bottom
+        : 0;
 
       // 转换为 rpx 并加上基础间距
       const padding = safeBottom * 2 + 12;
@@ -103,10 +104,15 @@ export default function Index() {
               style={{ WebkitTapHighlightColor: "transparent" }}
             >
               <Icon
-                className={`text-44rpx transition-colors duration-200 flex-shrink-0 block leading-none w-44rpx h-44rpx mb-4rpx ${isActive ? "text-primary-6" : "text-gray-5"}`}
+                className={`transition-colors duration-200 flex-shrink-0 block leading-none mb-4rpx ${
+                  isActive ? "text-primary-6" : "text-gray-6"
+                }`}
+                style={{ fontSize: "56rpx", width: "56rpx", height: "56rpx" }}
               />
               <Text
-                className={`text-22rpx transition-colors duration-200 leading-snug whitespace-nowrap overflow-hidden text-ellipsis max-w-full text-center flex-shrink-0 block ${isActive ? "text-primary-6 font-500" : "text-gray-5"}`}
+                className={`text-22rpx transition-colors duration-200 leading-snug whitespace-nowrap overflow-hidden text-ellipsis max-w-full text-center flex-shrink-0 block ${
+                  isActive ? "text-primary-6 font-500" : "text-gray-6"
+                }`}
               >
                 {tab.text}
               </Text>

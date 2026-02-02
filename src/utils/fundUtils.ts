@@ -88,9 +88,23 @@ export function getTrendStatus(value: number | string): "up" | "down" | "flat" {
 export function getTrendColorClass(value: number | string): string {
   const status = getTrendStatus(value);
   return {
-    up: "text-red-500",
-    down: "text-green-500",
-    flat: "text-gray-500",
+    up: "text-red-500", // 涨幅红色
+    down: "text-green-500", // 跌幅绿色
+    flat: "text-gray-5",
+  }[status];
+}
+
+/**
+ * 获取涨跌颜色样式对象（用于内联样式）
+ * @param value - 涨跌值
+ * @returns 样式对象
+ */
+export function getTrendColorStyle(value: number | string): { color: string } {
+  const status = getTrendStatus(value);
+  return {
+    up: { color: "#ff4444" }, // 涨幅红色
+    down: { color: "#00c851" }, // 跌幅绿色
+    flat: { color: "var(--gray-5)" },
   }[status];
 }
 
