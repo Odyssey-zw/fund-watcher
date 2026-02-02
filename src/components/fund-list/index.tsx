@@ -42,6 +42,7 @@ export default function FundList() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [topSafeHeight, setTopSafeHeight] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [tabBarHeight, setTabBarHeight] = useState(120); // 底部导航栏高度（rpx）
 
   const loadFunds = async (page: number = currentPage, isRefresh = false) => {
     try {
@@ -90,9 +91,18 @@ export default function FundList() {
         windowInfo.statusBarHeight ?? windowInfo.safeArea?.top ?? 0;
       const height = statusBarHeight * 2;
       setTopSafeHeight(Math.max(Number(height) || 0, 0));
+
+      // 获取底部安全区域高度
+      const safeBottom = windowInfo.safeArea?.bottom
+        ? windowInfo.screenHeight - windowInfo.safeArea.bottom
+        : 0;
+      const padding = safeBottom * 2 + 12;
+      const totalHeight = padding + 96; // 图标44rpx + 文字22rpx + 间距30rpx
+      setTabBarHeight(totalHeight);
     } catch (error) {
       console.warn("Failed to get safe area height:", error);
       setTopSafeHeight(0);
+      setTabBarHeight(120);
     }
   }, []);
 
@@ -198,6 +208,11 @@ export default function FundList() {
           refresherTriggered={refreshing}
           onRefresherRefresh={handlePullDownRefresh}
           onScrollToLower={handleReachBottom}
+          style={{
+            height: `calc(100vh - ${topSafeHeight + 88 + 88 + tabBarHeight}rpx)`,
+            marginTop: "-88rpx", // 负边距，让 ScrollView 从 Tab 栏下方开始
+            paddingTop: "88rpx", // Tab栏高度，确保内容不被遮挡
+          }}
         >
           {loading ? (
             <View className="p-40rpx text-center text-gray-5">
