@@ -37,7 +37,7 @@ export default function FundList() {
   const [hasMore, setHasMore] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"unitValue" | "estimate" | "return">(
-    "unitValue",
+    "return",
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [topSafeHeight, setTopSafeHeight] = useState(0);
@@ -232,10 +232,10 @@ export default function FundList() {
                   onClick={() => handleSort("unitValue")}
                 >
                   <View>
-                    <Text>净值</Text>
-                    <Text className="text-20rpx text-gray-4 leading-tight">
+                    <View>净值</View>
+                    <View className="text-20rpx text-gray-4 leading-tight">
                       {formatDateLabel(1)}
-                    </Text>
+                    </View>
                   </View>
                   {sortBy === "unitValue" ? (
                     sortOrder === "desc" ? (
@@ -250,10 +250,10 @@ export default function FundList() {
                   onClick={() => handleSort("estimate")}
                 >
                   <View>
-                    <Text>估值</Text>
-                    <Text className="text-20rpx text-gray-4 leading-tight">
+                    <View>估值</View>
+                    <View className="text-20rpx text-gray-4 leading-tight">
                       {formatDateLabel(0)}
-                    </Text>
+                    </View>
                   </View>
                   {sortBy === "estimate" ? (
                     sortOrder === "desc" ? (
@@ -309,77 +309,6 @@ export default function FundList() {
                         >
                           {fund.estimateChange != null
                             ? formatPercentage(fund.estimateChange)
-                            : "--"}
-                        </Text>
-                      </View>
-                      <View className="mr-20rpx w-120rpx flex flex-shrink-0 flex-col items-end justify-center">
-                        <Text
-                          className="fund-num"
-                          style={getTrendColorStyle(
-                            fund.returnAfterAddition ?? 0,
-                          )}
-                        >
-                          {fund.returnAfterAddition != null
-                            ? `${fund.returnAfterAddition >= 0 ? "+" : ""}${fund.returnAfterAddition.toFixed(2)}`
-                            : "--"}
-                        </Text>
-                        <Text className="text-24rpx text-gray-5 leading-tight">
-                          {fund.durationDays != null
-                            ? `${fund.durationDays}天`
-                            : "--"}
-                        </Text>
-                      </View>
-                      <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
-                        <Text
-                          className="text-24rpx leading-tight"
-                          style={
-                            fund.currentValue?.week1GrowthRate != null
-                              ? getTrendColorStyle(
-                                  fund.currentValue.week1GrowthRate,
-                                )
-                              : {}
-                          }
-                        >
-                          {fund.currentValue?.week1GrowthRate != null
-                            ? formatPercentage(
-                                fund.currentValue.week1GrowthRate,
-                              )
-                            : "--"}
-                        </Text>
-                      </View>
-                      <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
-                        <Text
-                          className="text-24rpx leading-tight"
-                          style={
-                            fund.currentValue?.month1GrowthRate != null
-                              ? getTrendColorStyle(
-                                  fund.currentValue.month1GrowthRate,
-                                )
-                              : {}
-                          }
-                        >
-                          {fund.currentValue?.month1GrowthRate != null
-                            ? formatPercentage(
-                                fund.currentValue.month1GrowthRate,
-                              )
-                            : "--"}
-                        </Text>
-                      </View>
-                      <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
-                        <Text
-                          className="text-24rpx leading-tight"
-                          style={
-                            fund.currentValue?.month6GrowthRate != null
-                              ? getTrendColorStyle(
-                                  fund.currentValue.month6GrowthRate,
-                                )
-                              : {}
-                          }
-                        >
-                          {fund.currentValue?.month6GrowthRate != null
-                            ? formatPercentage(
-                                fund.currentValue.month6GrowthRate,
-                              )
                             : "--"}
                         </Text>
                       </View>
