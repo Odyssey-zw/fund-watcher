@@ -17,6 +17,21 @@ export const HOT_FUND_CODES = [
   "015152",
   "019875",
   "014320",
+
+  "008114",
+  "014028",
+  "001466",
+  "001900",
+  "022286",
+  "022365",
+  "022364",
+  "011840",
+  "016531",
+  "017103",
+  "018125",
+  "017193",
+  "016371",
+  "020608",
 ] as const;
 
 /**
@@ -30,6 +45,5 @@ export const FUND_API_URLS = {
    * @param fundCode 基金代码
    * @returns 完整的 API URL
    */
-  getSinaFundUrl: (fundCode: string) =>
-    `${FUND_API_URLS.SINA_FUND_BASE}/${fundCode}.js`,
+  getSinaFundUrl: (fundCode: string) => `${FUND_API_URLS.SINA_FUND_BASE}/${fundCode}.js`,
 } as const;
