@@ -38,12 +38,11 @@ export default function FundList() {
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [topSafeHeight, setTopSafeHeight] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
   const [tabBarHeight, setTabBarHeight] = useState(120); // 底部导航栏高度（rpx）
 
-  const loadFunds = async (page: number = currentPage, isRefresh = false) => {
+  const loadFunds = async (page: number = currentPage, showLoading = true) => {
     try {
-      if (!isRefresh) {
+      if (showLoading) {
         setLoading(true);
       }
       const response = await getHotFunds({ page, pageSize: 20 });
@@ -67,15 +66,26 @@ export default function FundList() {
         setFunds([]);
       }
     } finally {
-      setLoading(false);
-      if (isRefresh) {
-        setRefreshing(false);
+      if (showLoading) {
+        setLoading(false);
       }
     }
   };
 
   useEffect(() => {
     loadFunds(1);
+  }, []);
+
+  // 每30秒自动刷新数据
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      loadFunds(1, false); // 不显示加载状态，静默刷新
+    }, 30000); // 30秒 = 30000毫秒
+
+    // 组件卸载时清理定时器
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   useEffect(() => {
@@ -147,12 +157,6 @@ export default function FundList() {
     });
   }, [funds, activeTab, sortBy, sortOrder]);
 
-  const handlePullDownRefresh = async () => {
-    setRefreshing(true);
-    setCurrentPage(1);
-    await loadFunds(1, true);
-  };
-
   const handleReachBottom = () => {
     if (hasMore && !loading) {
       setCurrentPage(p => p + 1);
@@ -198,9 +202,6 @@ export default function FundList() {
         <ScrollView
           className="fund-list-container"
           scrollY
-          refresherEnabled
-          refresherTriggered={refreshing}
-          onRefresherRefresh={handlePullDownRefresh}
           onScrollToLower={handleReachBottom}
           style={{
             height: `calc(100vh - ${topSafeHeight + 88 + tabBarHeight}rpx)`,
