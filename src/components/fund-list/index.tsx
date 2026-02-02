@@ -1,5 +1,5 @@
 import type { FundSearchResult } from "~/types/fund";
-import { ArrowDown, ArrowUp, MoreOutlined } from "@taroify/icons";
+import { ArrowDown, ArrowUp } from "@taroify/icons";
 import { ScrollView, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useEffect, useMemo, useState } from "react";
@@ -16,9 +16,6 @@ const TABS = [
   { key: "all", label: "全部" },
   { key: "held", label: "持有" },
   { key: "cleared", label: "已清仓" },
-  { key: "gp", label: "偏股" },
-  { key: "zq", label: "偏债" },
-  { key: "zs", label: "指数" },
 ] as const;
 
 /** 净值/估值日期展示用 */
@@ -186,7 +183,7 @@ export default function FundList() {
           {TABS.map(tab => (
             <View
               key={tab.key}
-              className={`flex-shrink-0 py-12rpx px-28rpx mr-16rpx text-28rpx pr cursor-pointer transition-colors duration-200 ${
+              className={`flex-shrink-0 pt-12rpx px-28rpx mr-16rpx text-28rpx pr cursor-pointer transition-colors duration-200 ${
                 activeTab === tab.key
                   ? "text-primary-6 font-500 relative after:content-[''] after:absolute after:left-1/2 after:bottom-[-24rpx] after:transform after:-translate-x-1/2 after:w-40rpx after:h-4rpx after:bg-primary-6 after:rounded-2rpx"
                   : "text-gray-6"
@@ -196,9 +193,6 @@ export default function FundList() {
               <Text>{tab.label}</Text>
             </View>
           ))}
-          <View className="ml-auto flex-shrink-0 px-24rpx py-12rpx text-36rpx text-gray-6">
-            <MoreOutlined />
-          </View>
         </View>
 
         <ScrollView
@@ -209,7 +203,7 @@ export default function FundList() {
           onRefresherRefresh={handlePullDownRefresh}
           onScrollToLower={handleReachBottom}
           style={{
-            height: `calc(100vh - ${topSafeHeight + 88 + 88 + tabBarHeight}rpx)`,
+            height: `calc(100vh - ${topSafeHeight + 88 + tabBarHeight}rpx)`,
             marginTop: "-88rpx", // 负边距，让 ScrollView 从 Tab 栏下方开始
             paddingTop: "88rpx", // Tab栏高度，确保内容不被遮挡
           }}
@@ -220,11 +214,11 @@ export default function FundList() {
             </View>
           ) : displayedFunds.length > 0 ? (
             <ScrollView className="w-full" scrollX>
-              <View className="min-w-600rpx flex items-end border-b border-gray-200 bg-gray-100 px-24rpx py-20rpx pb-16rpx text-24rpx text-gray-5">
-                <View className="mr-20rpx max-w-1/2 min-w-0 w-1/2 flex flex-shrink-0 flex-shrink-0 flex-grow-0 items-center gap-8rpx">
+              <View className="h-100rpx min-w-600rpx flex items-center border-b border-gray-200 bg-gray-100 px-24rpx py-20rpx pb-16rpx text-24rpx text-gray-5">
+                <View className="mr-20rpx h-full max-w-1/2 min-w-0 w-1/2 flex flex-shrink-0 flex-shrink-0 flex-grow-0 items-center gap-8rpx">
                   <View>
-                    <Text>基金名称</Text>
-                    <Text className="opacity-0"></Text>
+                    <View>基金名称</View>
+                    <View className="text-20rpx text-gray-4 leading-tight"></View>
                   </View>
                 </View>
                 <View
