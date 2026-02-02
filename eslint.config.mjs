@@ -10,6 +10,7 @@ export default kirklin({
     "style/brace-style": "off",
     "style/jsx-curly-newline": "off",
     "style/jsx-function-call-newline": "off",
+    "style/jsx-one-expression-per-line": "off",
     "style/indent": "off",
   },
   formatters: {

@@ -8,8 +8,8 @@ import type {
   PaginationResult,
 } from "~/types/common";
 import type { FundSearchResult } from "~/types/fund";
-import Taro from "@tarojs/taro";
-import { FUND_API_URLS, HOT_FUND_CODES } from "~/constants/fund";
+import { HOT_FUND_CODES } from "~/constants/fund";
+import { getSinaFundData } from "./fund-internal";
 
 /**
  * 获取热门基金列表（返回列表页所需的净值与涨跌幅）
@@ -75,41 +75,6 @@ export async function getHotFunds(
         totalPages: 0,
       },
     };
-  }
-}
-
-/**
- * 从新浪财经获取单个基金数据
- * @param fundCode 基金代码（如：005911）
- * @returns 基金实时数据
- */
-async function getSinaFundData(fundCode: string): Promise<any | null> {
-  try {
-    const sinaUrl = FUND_API_URLS.getSinaFundUrl(fundCode);
-    const response = await Taro.request({
-      url: sinaUrl,
-      method: "GET",
-      dataType: "text",
-      header: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const responseText = response.data as string;
-    if (typeof responseText === "string") {
-      const jsonMatch = responseText.match(/jsonpgz\((.*)\)/);
-      if (jsonMatch && jsonMatch[1]) {
-        try {
-          return JSON.parse(jsonMatch[1]);
-        } catch {
-          return null;
-        }
-      }
-    }
-    return null;
-  } catch (error) {
-    console.error(`获取基金${fundCode}数据失败:`, error);
-    return null;
   }
 }
 

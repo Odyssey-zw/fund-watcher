@@ -15,8 +15,8 @@ importers:
         specifier: ^0.0.6
         version: 0.0.6
       '@nutui/nutui-react-taro':
-        specifier: 3.0.19-cpp.25
-        version: 3.0.19-cpp.25(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.0.18
+        version: 3.0.18(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query':
         specifier: ^5.66.0
         version: 5.90.20(react@18.3.1)
@@ -2190,8 +2190,8 @@ packages:
   '@nutui/lottie-miniprogram@1.0.2':
     resolution: {integrity: sha512-6xV+uW8VK1hT8QfjqfNlURTiQijb/dEEl/AeOudMwOB55Fr2+TdxoOAks5d8vnYBTYDZyOUlcsGNgoAkXKz8Qg==}
 
-  '@nutui/nutui-react-taro@3.0.19-cpp.25':
-    resolution: {integrity: sha512-KkhNvOE/U69Ps/D0IOIwgRQdelx0FkTJpIBSnr8psfYgbssXSFkVJoVAM87JUXZXYH6aTyGRqP/Tr2ny6RBLgg==}
+  '@nutui/nutui-react-taro@3.0.18':
+    resolution: {integrity: sha512-qDDP92eat3CwfCsvvWt+MYwjN4Sh/J+q4fiq/a5WWSgWEn9BROujctuqymPch3K0vBWRfCPpnNPGO9+JVqjdeQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
@@ -12039,7 +12039,7 @@ snapshots:
 
   '@nutui/lottie-miniprogram@1.0.2': {}
 
-  '@nutui/nutui-react-taro@3.0.19-cpp.25(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@nutui/nutui-react-taro@3.0.18(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.28.6
       '@nutui/icons-react-taro': 3.0.2-cpp.3.beta.5
