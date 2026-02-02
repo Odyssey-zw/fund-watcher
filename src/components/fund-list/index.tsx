@@ -4,7 +4,7 @@ import { ScrollView, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useEffect, useMemo, useState } from "react";
 import { getHotFunds } from "~/api/fund";
-import PageWrapper from "~/components/page-wrapper";
+import PageWrapper, { usePageLayout } from "~/components/page-wrapper";
 import {
   formatFundValue,
   formatPercentage,
@@ -37,8 +37,6 @@ export default function FundList() {
     "return",
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [topSafeHeight, setTopSafeHeight] = useState(0);
-  const [tabBarHeight, setTabBarHeight] = useState(120); // 底部导航栏高度（rpx）
 
   const loadFunds = async (page: number = currentPage, showLoading = true) => {
     try {
@@ -86,31 +84,6 @@ export default function FundList() {
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
-
-  useEffect(() => {
-    try {
-      const windowInfo = Taro.getWindowInfo();
-      // statusBarHeight 是 px 单位，需要转换为 rpx
-      // 1px = 2rpx (假设设计稿是 750rpx = 375px)
-      // 优先使用 statusBarHeight，如果没有则使用 safeArea.top
-      const statusBarHeight =
-        windowInfo.statusBarHeight ?? windowInfo.safeArea?.top ?? 0;
-      const height = statusBarHeight * 2;
-      setTopSafeHeight(Math.max(Number(height) || 0, 0));
-
-      // 获取底部安全区域高度
-      const safeBottom = windowInfo.safeArea?.bottom
-        ? windowInfo.screenHeight - windowInfo.safeArea.bottom
-        : 0;
-      const padding = safeBottom * 2 + 12;
-      const totalHeight = padding + 96; // 图标44rpx + 文字22rpx + 间距30rpx
-      setTabBarHeight(totalHeight);
-    } catch (error) {
-      console.warn("Failed to get safe area height:", error);
-      setTopSafeHeight(0);
-      setTabBarHeight(120);
-    }
   }, []);
 
   useEffect(() => {
@@ -168,45 +141,88 @@ export default function FundList() {
       title="基金列表"
       showHeader
       headerStyle="centered"
+      showTabBar={true}
+      tabBarHeight={88}
       contentPadding={false}
+      enableScroll={false}
     >
+      <FundListContent
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        displayedFunds={displayedFunds}
+        loading={loading}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        handleSort={handleSort}
+        handleReachBottom={handleReachBottom}
+        formatDateLabel={formatDateLabel}
+      />
+    </PageWrapper>
+  );
+}
+
+function FundListContent({
+  activeTab,
+  setActiveTab,
+  displayedFunds,
+  loading,
+  sortBy,
+  sortOrder,
+  handleSort,
+  handleReachBottom,
+  formatDateLabel,
+}: {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  displayedFunds: FundSearchResult[];
+  loading: boolean;
+  sortBy: "unitValue" | "estimate" | "return";
+  sortOrder: "asc" | "desc";
+  handleSort: (field: "unitValue" | "estimate" | "return") => void;
+  handleReachBottom: () => void;
+  formatDateLabel: (offsetDays: number) => string;
+}) {
+  const layoutInfo = usePageLayout();
+
+  return (
+    <View className="p-0">
+      {/* 固定标签栏 */}
       <View
-        className="p-0"
+        className="pf left-0 right-0 z-99 flex flex-nowrap items-center overflow-x-auto border-b border-gray-200 bg-white py-24rpx pl-24rpx"
         style={{
-          paddingTop: `${topSafeHeight + 176}rpx`, // 安全区域 + 标题(88) + 标签栏(88)
+          top: `${layoutInfo.topSafeHeight + layoutInfo.headerHeight}rpx`,
+          paddingLeft: "calc(24rpx + env(safe-area-inset-left, 0px))",
+          paddingRight: "calc(24rpx + env(safe-area-inset-right, 0px))",
         }}
       >
-        <View
-          className="pf left-0 right-0 z-99 flex flex-nowrap items-center overflow-x-auto border-b border-gray-200 bg-white py-24rpx pl-24rpx"
-          style={{
-            top: `${topSafeHeight + 88}rpx`, // 安全区域 + 标题高度
-            paddingLeft: "calc(24rpx + env(safe-area-inset-left, 0px))",
-            paddingRight: "calc(24rpx + env(safe-area-inset-right, 0px))",
-          }}
-        >
-          {TABS.map(tab => (
-            <View
-              key={tab.key}
-              className={`flex-shrink-0 pt-12rpx px-28rpx mr-16rpx text-28rpx pr cursor-pointer transition-colors duration-200 ${
-                activeTab === tab.key
-                  ? "text-primary-6 font-500 relative after:content-[''] after:absolute after:left-1/2 after:bottom-[-24rpx] after:transform after:-translate-x-1/2 after:w-40rpx after:h-4rpx after:bg-primary-6 after:rounded-2rpx"
-                  : "text-gray-6"
-              }`}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              <Text>{tab.label}</Text>
-            </View>
-          ))}
-        </View>
+        {TABS.map(tab => (
+          <View
+            key={tab.key}
+            className={`flex-shrink-0 pt-12rpx px-28rpx mr-16rpx text-28rpx pr cursor-pointer transition-colors duration-200 ${
+              activeTab === tab.key
+                ? "text-primary-6 font-500 relative after:content-[''] after:absolute after:left-1/2 after:bottom-[-24rpx] after:transform after:-translate-x-1/2 after:w-40rpx after:h-4rpx after:bg-primary-6 after:rounded-2rpx"
+                : "text-gray-6"
+            }`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            <Text>{tab.label}</Text>
+          </View>
+        ))}
+      </View>
 
+      {/* 内容区域 - 固定高度 ScrollView */}
+      <View
+        style={{
+          height: layoutInfo.scrollViewHeight,
+          overflow: "hidden",
+        }}
+      >
         <ScrollView
           className="fund-list-container"
           scrollY
           onScrollToLower={handleReachBottom}
           style={{
-            height: `calc(100vh - ${topSafeHeight + 88 + tabBarHeight}rpx)`,
-            marginTop: "-88rpx", // 负边距，让 ScrollView 从 Tab 栏下方开始
-            paddingTop: "88rpx", // Tab栏高度，确保内容不被遮挡
+            height: "100%",
           }}
         >
           {loading ? (
@@ -319,6 +335,6 @@ export default function FundList() {
           )}
         </ScrollView>
       </View>
-    </PageWrapper>
+    </View>
   );
 }

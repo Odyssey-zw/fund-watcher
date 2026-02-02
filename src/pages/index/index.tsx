@@ -4,7 +4,7 @@ import {
   HomeOutlined,
   UserOutlined,
 } from "@taroify/icons";
-import { ScrollView, Text, View } from "@tarojs/components";
+import { Text, View } from "@tarojs/components";
 import Taro, { useLoad } from "@tarojs/taro";
 import { useEffect, useState } from "react";
 import FundList from "~/components/fund-list";
@@ -78,14 +78,22 @@ export default function Index() {
   const ActiveComponent = activeTabConfig?.component || Home;
 
   return (
-    <View className="h-screen flex flex-col bg-white">
-      <ScrollView
-        className="mb-0 box-border overflow-y-auto"
-        scrollY
-        style={{ height: `calc(100vh - ${tabBarHeight})` }}
+    <View
+      className="h-screen flex flex-col bg-white"
+      style={{
+        height: "100vh",
+        overflow: "hidden",
+      }}
+    >
+      <View
+        className="flex-1"
+        style={{
+          height: `calc(100vh - ${tabBarHeight})`,
+          overflow: "hidden",
+        }}
       >
         <ActiveComponent />
-      </ScrollView>
+      </View>
 
       <View
         className="pf bottom-0 left-0 right-0 z-999 box-border w-full flex items-start justify-around bg-white pt-12rpx shadow-[0_-1rpx_0_0_rgba(0,0,0,0.06)]"
