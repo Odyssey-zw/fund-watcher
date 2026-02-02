@@ -83,15 +83,11 @@ export default function FundList() {
   useEffect(() => {
     try {
       const windowInfo = Taro.getWindowInfo();
-      const deviceInfo = Taro.getDeviceInfo();
       // statusBarHeight 是 px 单位，需要转换为 rpx
       // 1px = 2rpx (假设设计稿是 750rpx = 375px)
       // 优先使用 statusBarHeight，如果没有则使用 safeArea.top
       const statusBarHeight =
-        windowInfo.statusBarHeight ??
-        deviceInfo.statusBarHeight ??
-        windowInfo.safeArea?.top ??
-        0;
+        windowInfo.statusBarHeight ?? windowInfo.safeArea?.top ?? 0;
       const height = statusBarHeight * 2;
       setTopSafeHeight(Math.max(Number(height) || 0, 0));
     } catch (error) {
@@ -173,8 +169,8 @@ export default function FundList() {
           className="pf left-0 right-0 z-99 flex flex-nowrap items-center overflow-x-auto border-b border-gray-200 bg-white py-24rpx pl-24rpx"
           style={{
             top: `${topSafeHeight + 88}rpx`, // 安全区域 + 标题高度
-            paddingLeft: "calc(24rpx + constant(safe-area-inset-left, 0px))",
-            paddingRight: "calc(24rpx + constant(safe-area-inset-right, 0px))",
+            paddingLeft: "calc(24rpx + env(safe-area-inset-left, 0px))",
+            paddingRight: "calc(24rpx + env(safe-area-inset-right, 0px))",
           }}
         >
           {TABS.map(tab => (

@@ -1,11 +1,30 @@
 import { Text, View } from "@tarojs/components";
+import Taro from "@tarojs/taro";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [topPadding, setTopPadding] = useState("92rpx"); // 默认值：44px + 48rpx
+
+  useEffect(() => {
+    try {
+      const windowInfo = Taro.getWindowInfo();
+      const deviceInfo = Taro.getDeviceInfo();
+
+      // 获取状态栏高度
+      const statusBarHeight = windowInfo.statusBarHeight ?? deviceInfo.statusBarHeight ?? 44;
+      // 转换为 rpx (1px = 2rpx)，并加上额外的48rpx间距
+      const padding = statusBarHeight * 2 + 48;
+      setTopPadding(`${padding}rpx`);
+    } catch (error) {
+      console.warn("Failed to get status bar height:", error);
+    }
+  }, []);
+
   return (
     <View
       className="min-h-full from-blue-5 to-purple-6 bg-gradient-to-br px-30rpx pb-0"
       style={{
-        paddingTop: "calc(constant(safe-area-inset-top, 44px) + 48rpx)",
+        paddingTop: topPadding,
       }}
     >
       <View className="mb-60rpx pt-40rpx text-center">

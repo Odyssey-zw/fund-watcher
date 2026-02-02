@@ -26,15 +26,11 @@ export default function PageWrapper({
   useEffect(() => {
     try {
       const windowInfo = Taro.getWindowInfo();
-      const deviceInfo = Taro.getDeviceInfo();
       // statusBarHeight 是 px 单位，需要转换为 rpx
       // 1px = 2rpx (假设设计稿是 750rpx = 375px)
       // 优先使用 statusBarHeight，如果没有则使用 safeArea.top
       const statusBarHeight =
-        windowInfo.statusBarHeight ??
-        deviceInfo.statusBarHeight ??
-        windowInfo.safeArea?.top ??
-        0;
+        windowInfo.statusBarHeight ?? windowInfo.safeArea?.top ?? 0;
       const height = statusBarHeight * 2;
       setTopSafeHeight(Math.max(Number(height) || 0, 0));
     } catch (error) {
@@ -59,8 +55,8 @@ export default function PageWrapper({
           } h-88rpx bg-white border-b border-gray-3 z-100`}
           style={{
             top: `${topSafeHeight}rpx`,
-            paddingLeft: "constant(safe-area-inset-left, 0px)",
-            paddingRight: "constant(safe-area-inset-right, 0px)",
+            paddingLeft: "env(safe-area-inset-left, 0px)",
+            paddingRight: "env(safe-area-inset-right, 0px)",
           }}
         >
           <Text className="flex items-center justify-center text-36rpx text-gray-8 font-600 leading-none">
