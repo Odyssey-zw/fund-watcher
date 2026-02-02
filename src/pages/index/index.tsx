@@ -11,7 +11,6 @@ import FundList from "~/components/fund-list";
 import Home from "~/components/home";
 import Position from "~/components/position";
 import Profile from "~/components/profile";
-import "./index.scss";
 
 const TAB_LIST = [
   {
@@ -57,24 +56,35 @@ export default function Index() {
   const ActiveComponent = activeTabConfig?.component || Home;
 
   return (
-    <View className="main-page">
-      <ScrollView className="main-content" scrollY>
+    <View className="h-screen flex flex-col bg-white">
+      <ScrollView className="mb-0 box-border flex-1 overflow-y-auto" scrollY>
         <ActiveComponent />
       </ScrollView>
 
-      <View className="tab-bar">
+      <View
+        className="pf bottom-0 left-0 right-0 z-999 box-border w-full flex items-start justify-around bg-white pt-12rpx shadow-[0_-1rpx_0_0_rgba(0,0,0,0.06)]"
+        style={{
+          paddingBottom: "calc(constant(safe-area-inset-bottom, 0px) + 12rpx)",
+        }}
+      >
         {TAB_LIST.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
           return (
             <View
               key={tab.key}
-              className={`tab-item ${isActive ? "active" : ""}`}
+              className="pr min-w-0 flex flex-1 flex-col cursor-pointer select-none items-center justify-start overflow-visible p-0"
               onClick={() => handleTabChange(tab.key)}
+              style={{ WebkitTapHighlightColor: "transparent" }}
             >
-              <Icon className="tab-icon" />
-              <Text className="tab-text">{tab.text}</Text>
-              {isActive && <View className="tab-indicator" />}
+              <Icon
+                className={`text-44rpx transition-colors duration-200 flex-shrink-0 block leading-none w-44rpx h-44rpx mb-4rpx ${isActive ? "text-primary-6" : "text-gray-5"}`}
+              />
+              <Text
+                className={`text-22rpx transition-colors duration-200 leading-snug whitespace-nowrap overflow-hidden text-ellipsis max-w-full text-center flex-shrink-0 block ${isActive ? "text-primary-6 font-500" : "text-gray-5"}`}
+              >
+                {tab.text}
+              </Text>
             </View>
           );
         })}

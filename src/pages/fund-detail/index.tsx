@@ -1,6 +1,5 @@
 import { Text, View } from "@tarojs/components";
 import { useLoad } from "@tarojs/taro";
-import "./index.scss";
 
 export default function FundDetail() {
   useLoad(() => {
@@ -8,11 +7,11 @@ export default function FundDetail() {
   });
 
   return (
-    <View className="fund-detail-page">
-      <View className="header">
-        <Text className="title">基金详情</Text>
+    <View className="min-h-screen bg-gray-1 p-30rpx">
+      <View className="mb-40rpx pt-40rpx text-center">
+        <Text className="text-40rpx text-gray-8 font-bold">基金详情</Text>
       </View>
-      <View className="content">
+      <View className="text-center text-32rpx text-gray-5">
         <Text>基金详情页面开发中...</Text>
       </View>
     </View>

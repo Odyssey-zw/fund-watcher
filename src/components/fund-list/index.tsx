@@ -10,7 +10,6 @@ import {
   formatPercentage,
   getTrendColorClass,
 } from "~/utils/fundUtils";
-import "./index.scss";
 
 /** 顶部 Tab 选项 */
 const TABS = [
@@ -84,15 +83,14 @@ export default function FundList() {
   useEffect(() => {
     try {
       const windowInfo = Taro.getWindowInfo();
-      const systemInfo = Taro.getSystemInfoSync();
+      const deviceInfo = Taro.getDeviceInfo();
       // statusBarHeight 是 px 单位，需要转换为 rpx
       // 1px = 2rpx (假设设计稿是 750rpx = 375px)
       // 优先使用 statusBarHeight，如果没有则使用 safeArea.top
       const statusBarHeight =
         windowInfo.statusBarHeight ??
-        systemInfo.statusBarHeight ??
+        deviceInfo.statusBarHeight ??
         windowInfo.safeArea?.top ??
-        systemInfo.safeArea?.top ??
         0;
       const height = statusBarHeight * 2;
       setTopSafeHeight(Math.max(Number(height) || 0, 0));
@@ -166,27 +164,33 @@ export default function FundList() {
       contentPadding={false}
     >
       <View
-        className="fund-list-content"
+        className="p-0"
         style={{
           paddingTop: `${topSafeHeight + 176}rpx`, // 安全区域 + 标题(88) + 标签栏(88)
         }}
       >
         <View
-          className="fund-tabs"
+          className="pf left-0 right-0 z-99 flex flex-nowrap items-center overflow-x-auto border-b border-gray-200 bg-white py-24rpx pl-24rpx"
           style={{
             top: `${topSafeHeight + 88}rpx`, // 安全区域 + 标题高度
+            paddingLeft: "calc(24rpx + constant(safe-area-inset-left, 0px))",
+            paddingRight: "calc(24rpx + constant(safe-area-inset-right, 0px))",
           }}
         >
           {TABS.map(tab => (
             <View
               key={tab.key}
-              className={`fund-tab ${activeTab === tab.key ? "active" : ""}`}
+              className={`flex-shrink-0 py-12rpx px-28rpx mr-16rpx text-28rpx pr cursor-pointer transition-colors duration-200 ${
+                activeTab === tab.key
+                  ? "text-primary-6 font-500 relative after:content-[''] after:absolute after:left-1/2 after:bottom-[-24rpx] after:transform after:-translate-x-1/2 after:w-40rpx after:h-4rpx after:bg-primary-6 after:rounded-2rpx"
+                  : "text-gray-6"
+              }`}
               onClick={() => setActiveTab(tab.key)}
             >
               <Text>{tab.label}</Text>
             </View>
           ))}
-          <View className="fund-tabs-more">
+          <View className="ml-auto flex-shrink-0 px-24rpx py-12rpx text-36rpx text-gray-6">
             <MoreOutlined />
           </View>
         </View>
@@ -200,25 +204,27 @@ export default function FundList() {
           onScrollToLower={handleReachBottom}
         >
           {loading ? (
-            <View className="loading">
+            <View className="p-40rpx text-center text-gray-5">
               <Text>加载中...</Text>
             </View>
           ) : displayedFunds.length > 0 ? (
-            <ScrollView className="fund-table-wrapper" scrollX>
-              <View className="fund-table-header">
-                <View className="fund-th fund-th-name">
+            <ScrollView className="w-full" scrollX>
+              <View className="min-w-600rpx flex items-end border-b border-gray-200 bg-gray-100 px-24rpx py-20rpx pb-16rpx text-24rpx text-gray-5">
+                <View className="mr-20rpx max-w-1/2 min-w-0 w-1/2 flex flex-shrink-0 flex-shrink-0 flex-grow-0 items-center gap-8rpx">
                   <View>
                     <Text>基金名称</Text>
-                    <Text className="fund-th-date-placeholder"></Text>
+                    <Text className="opacity-0"></Text>
                   </View>
                 </View>
                 <View
-                  className="fund-th fund-th-num"
+                  className="mr-20rpx w-120rpx flex flex-shrink-0 cursor-pointer items-center justify-end gap-8rpx"
                   onClick={() => handleSort("unitValue")}
                 >
                   <View>
                     <Text>净值</Text>
-                    <Text className="fund-th-date">{formatDateLabel(1)}</Text>
+                    <Text className="text-20rpx text-gray-4 leading-tight">
+                      {formatDateLabel(1)}
+                    </Text>
                   </View>
                   {sortBy === "unitValue" ? (
                     sortOrder === "desc" ? (
@@ -229,12 +235,14 @@ export default function FundList() {
                   ) : null}
                 </View>
                 <View
-                  className="fund-th fund-th-num"
+                  className="mr-20rpx w-120rpx flex flex-shrink-0 cursor-pointer items-center justify-end gap-8rpx"
                   onClick={() => handleSort("estimate")}
                 >
                   <View>
                     <Text>估值</Text>
-                    <Text className="fund-th-date">{formatDateLabel(0)}</Text>
+                    <Text className="text-20rpx text-gray-4 leading-tight">
+                      {formatDateLabel(0)}
+                    </Text>
                   </View>
                   {sortBy === "estimate" ? (
                     sortOrder === "desc" ? (
@@ -245,49 +253,53 @@ export default function FundList() {
                   ) : null}
                 </View>
               </View>
-              <View className="fund-table-body">
+              <View>
                 {displayedFunds.map(fund => (
                   <View
                     key={fund.code}
-                    className="fund-row"
+                    className="min-w-600rpx flex cursor-pointer items-center border-b border-gray-200 bg-white px-24rpx py-24rpx transition-colors duration-200 active:bg-gray-50"
                     onClick={() =>
                       Taro.navigateTo({
                         url: `/pages/fund-detail/index?code=${fund.code}`,
                       })
                     }
                   >
-                    <View className="fund-row-left">
-                      <Text className="fund-row-name">{fund.name}</Text>
-                      <Text className="fund-row-code">{fund.code}</Text>
+                    <View className="mr-20rpx max-w-1/2 min-w-0 w-1/2 flex flex-shrink-0 flex-grow-0 flex-col items-start justify-center overflow-hidden">
+                      <Text className="mb-8rpx w-full overflow-hidden text-ellipsis whitespace-nowrap text-28rpx text-gray-8 font-500 leading-tight">
+                        {fund.name}
+                      </Text>
+                      <Text className="text-24rpx text-gray-5 leading-tight">
+                        {fund.code}
+                      </Text>
                     </View>
-                    <View className="fund-row-right">
-                      <View className="fund-col">
-                        <Text className="fund-num">
+                    <View className="min-w-0 flex flex-1 items-center">
+                      <View className="mr-20rpx w-120rpx flex flex-shrink-0 flex-col items-end justify-center">
+                        <Text className="mb-4rpx text-28rpx font-500 leading-tight">
                           {formatFundValue(fund.unitValue ?? 0)}
                         </Text>
                         <Text
-                          className={`fund-change ${getTrendColorClass(fund.dayGrowthRate ?? 0)}`}
+                          className={`text-24rpx leading-tight ${getTrendColorClass(fund.dayGrowthRate ?? 0)}`}
                         >
                           {fund.dayGrowthRate != null
                             ? formatPercentage(fund.dayGrowthRate)
                             : "--"}
                         </Text>
                       </View>
-                      <View className="fund-col">
-                        <Text className="fund-num">
+                      <View className="mr-20rpx w-120rpx flex flex-shrink-0 flex-col items-end justify-center">
+                        <Text className="mb-4rpx text-28rpx font-500 leading-tight">
                           {fund.estimateValue != null
                             ? formatFundValue(fund.estimateValue)
                             : "--"}
                         </Text>
                         <Text
-                          className={`fund-change ${getTrendColorClass(fund.estimateChange ?? 0)}`}
+                          className={`text-24rpx leading-tight ${getTrendColorClass(fund.estimateChange ?? 0)}`}
                         >
                           {fund.estimateChange != null
                             ? formatPercentage(fund.estimateChange)
                             : "--"}
                         </Text>
                       </View>
-                      <View className="fund-col fund-col-return">
+                      <View className="mr-20rpx w-120rpx flex flex-shrink-0 flex-col items-end justify-center">
                         <Text
                           className={`fund-num ${getTrendColorClass(fund.returnAfterAddition ?? 0)}`}
                         >
@@ -295,15 +307,15 @@ export default function FundList() {
                             ? `${fund.returnAfterAddition >= 0 ? "+" : ""}${fund.returnAfterAddition.toFixed(2)}`
                             : "--"}
                         </Text>
-                        <Text className="fund-duration">
+                        <Text className="text-24rpx text-gray-5 leading-tight">
                           {fund.durationDays != null
                             ? `${fund.durationDays}天`
                             : "--"}
                         </Text>
                       </View>
-                      <View className="fund-col fund-col-rate">
+                      <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
                         <Text
-                          className={`fund-change ${fund.currentValue?.week1GrowthRate != null ? getTrendColorClass(fund.currentValue.week1GrowthRate) : ""}`}
+                          className={`text-24rpx leading-tight ${fund.currentValue?.week1GrowthRate != null ? getTrendColorClass(fund.currentValue.week1GrowthRate) : ""}`}
                         >
                           {fund.currentValue?.week1GrowthRate != null
                             ? formatPercentage(
@@ -312,9 +324,9 @@ export default function FundList() {
                             : "--"}
                         </Text>
                       </View>
-                      <View className="fund-col fund-col-rate">
+                      <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
                         <Text
-                          className={`fund-change ${fund.currentValue?.month1GrowthRate != null ? getTrendColorClass(fund.currentValue.month1GrowthRate) : ""}`}
+                          className={`text-24rpx leading-tight ${fund.currentValue?.month1GrowthRate != null ? getTrendColorClass(fund.currentValue.month1GrowthRate) : ""}`}
                         >
                           {fund.currentValue?.month1GrowthRate != null
                             ? formatPercentage(
@@ -323,9 +335,9 @@ export default function FundList() {
                             : "--"}
                         </Text>
                       </View>
-                      <View className="fund-col fund-col-rate">
+                      <View className="mr-20rpx w-85rpx flex flex-shrink-0 flex-col items-end justify-center">
                         <Text
-                          className={`fund-change ${fund.currentValue?.month6GrowthRate != null ? getTrendColorClass(fund.currentValue.month6GrowthRate) : ""}`}
+                          className={`text-24rpx leading-tight ${fund.currentValue?.month6GrowthRate != null ? getTrendColorClass(fund.currentValue.month6GrowthRate) : ""}`}
                         >
                           {fund.currentValue?.month6GrowthRate != null
                             ? formatPercentage(
@@ -340,7 +352,7 @@ export default function FundList() {
               </View>
             </ScrollView>
           ) : (
-            <View className="empty-state">
+            <View className="p-60rpx text-center text-gray-5">
               <Text>暂无基金数据</Text>
             </View>
           )}

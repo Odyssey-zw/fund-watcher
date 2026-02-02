@@ -171,9 +171,6 @@ importers:
       '@types/react':
         specifier: ^19.0.8
         version: 19.2.10
-      '@types/sass':
-        specifier: ^1.45.0
-        version: 1.45.0
       '@types/webpack-env':
         specifier: ^1.18.8
         version: 1.18.8

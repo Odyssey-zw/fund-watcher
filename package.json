@@ -164,7 +164,6 @@
     "@types/minimatch": "^6.0.0",
     "@types/node": "^22.13.1",
     "@types/react": "^19.0.8",
-    "@types/sass": "^1.45.0",
     "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.23.0",
     "@typescript-eslint/parser": "^8.23.0",

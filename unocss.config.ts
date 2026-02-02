@@ -200,7 +200,7 @@ export default defineConfig({
     },
   },
   transformers: [
-    transformerDirectives(),
+    // transformerDirectives(), // 暂时禁用，因为webpack集成问题
     transformerVariantGroup(),
     // Don't change the following order
     transformerAttributify(),
