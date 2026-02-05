@@ -1,9 +1,4 @@
-import {
-  BalanceListOutlined,
-  ChartTrendingOutlined,
-  HomeOutlined,
-  UserOutlined,
-} from "@taroify/icons";
+import { BalanceListOutlined, ChartTrendingOutlined, HomeOutlined, UserOutlined } from "@taroify/icons";
 import { Text, View } from "@tarojs/components";
 import Taro, { useLoad } from "@tarojs/taro";
 import { useEffect, useState } from "react";
@@ -40,9 +35,7 @@ const TAB_LIST = [
 ] as const;
 
 export default function Index() {
-  const [activeTab, setActiveTab] = useState<
-    "home" | "fund" | "position" | "profile"
-  >("home");
+  const [activeTab, setActiveTab] = useState<"home" | "fund" | "position" | "profile">("home");
   const [bottomPadding, setBottomPadding] = useState("12rpx"); // 默认值
   const [tabBarHeight, setTabBarHeight] = useState("120rpx"); // 底部导航栏高度
 
@@ -55,9 +48,7 @@ export default function Index() {
       const windowInfo = Taro.getWindowInfo();
 
       // 获取底部安全区域高度
-      const safeBottom = windowInfo.safeArea?.bottom
-        ? windowInfo.screenHeight - windowInfo.safeArea.bottom
-        : 0;
+      const safeBottom = windowInfo.safeArea?.bottom ? windowInfo.screenHeight - windowInfo.safeArea.bottom : 0;
 
       // 转换为 rpx 并加上基础间距
       const padding = safeBottom * 2 + 12;
@@ -112,10 +103,13 @@ export default function Index() {
               style={{ WebkitTapHighlightColor: "transparent" }}
             >
               <Icon
-                className={`transition-colors duration-200 flex-shrink-0 block leading-none mb-4rpx ${
-                  isActive ? "text-primary-6" : "text-gray-6"
-                }`}
-                style={{ fontSize: "56rpx", width: "56rpx", height: "56rpx" }}
+                className="mb-4rpx block flex-shrink-0 leading-none transition-colors duration-200"
+                style={{
+                  fontSize: "56rpx",
+                  width: "56rpx",
+                  height: "56rpx",
+                  color: isActive ? "var(--primary-color-6)" : "var(--gray-6)",
+                }}
               />
               <Text
                 className={`text-22rpx transition-colors duration-200 leading-snug whitespace-nowrap overflow-hidden text-ellipsis max-w-full text-center flex-shrink-0 block ${
