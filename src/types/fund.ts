@@ -113,3 +113,54 @@ export interface FundSearchResult {
   /** 添加时长（天） */
   durationDays?: number;
 }
+
+/**
+ * 图表数据点
+ */
+export interface FundChartData {
+  /** 时间戳或日期字符串 */
+  time: string;
+  /** 净值 */
+  value: number;
+  /** 成交量（可选） */
+  volume?: number;
+  /** 涨跌幅（可选） */
+  change?: number;
+}
+
+/**
+ * 基金性能指标
+ */
+export interface FundPerformanceMetrics {
+  /** 夏普比率 */
+  sharpeRatio?: number;
+  /** 最大回撤 */
+  maxDrawdown?: number;
+  /** 波动率 */
+  volatility?: number;
+  /** 年化收益率 */
+  annualizedReturn?: number;
+}
+
+/**
+ * 基金详情页数据
+ */
+export interface FundDetailPage extends FundInfo {
+  /** 当前净值信息 */
+  currentValue: FundValue;
+  /** 图表数据 */
+  chartData: FundChartData[];
+  /** 性能指标 */
+  performanceMetrics?: FundPerformanceMetrics;
+  /** 基金经理 */
+  manager?: string;
+  /** 基金规模 */
+  scale?: string;
+  /** 成立日期 */
+  establishDate: string;
+}
+
+/**
+ * 图表时间周期
+ */
+export type FundChartPeriod = "1d" | "5d" | "1m" | "3m" | "6m" | "1y" | "all";

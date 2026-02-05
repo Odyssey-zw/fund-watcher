@@ -55,15 +55,12 @@ export default function PageWrapper({
       // statusBarHeight 是 px 单位，需要转换为 rpx
       // 1px = 2rpx (假设设计稿是 750rpx = 375px)
       // 优先使用 statusBarHeight，如果没有则使用 safeArea.top
-      const statusBarHeight =
-        windowInfo.statusBarHeight ?? windowInfo.safeArea?.top ?? 0;
+      const statusBarHeight = windowInfo.statusBarHeight ?? windowInfo.safeArea?.top ?? 0;
       const height = statusBarHeight * 2;
       setTopSafeHeight(Math.max(Number(height) || 0, 0));
 
       // 获取底部安全区域高度
-      const safeBottom = windowInfo.safeArea?.bottom
-        ? windowInfo.screenHeight - windowInfo.safeArea.bottom
-        : 0;
+      const safeBottom = windowInfo.safeArea?.bottom ? windowInfo.screenHeight - windowInfo.safeArea.bottom : 0;
       const padding = safeBottom * 2 + 12;
       const totalHeight = padding + 96; // 图标44rpx + 文字22rpx + 间距30rpx
       setBottomTabBarHeight(totalHeight);
@@ -76,8 +73,7 @@ export default function PageWrapper({
 
   const headerHeight = 88; // 标题栏高度（rpx）
   const tabBarHeight = showTabBar ? customTabBarHeight : 0; // 标签栏高度（rpx）
-  const contentTopOffset =
-    topSafeHeight + (showHeader ? headerHeight : 0) + tabBarHeight;
+  const contentTopOffset = topSafeHeight + (showHeader ? headerHeight : 0) + tabBarHeight;
   const scrollViewHeight = `calc(100vh - ${topSafeHeight + (showHeader ? headerHeight : 0) + tabBarHeight + bottomTabBarHeight}rpx)`;
 
   const layoutInfo: PageLayoutInfo = {
@@ -108,9 +104,7 @@ export default function PageWrapper({
         {showHeader && title && (
           <View
             className={`pf left-0 right-0 flex items-center ${
-              headerStyle === "default"
-                ? "justify-start px-30rpx"
-                : "justify-center text-center"
+              headerStyle === "default" ? "justify-start !px-30rpx" : "justify-center text-center"
             } h-88rpx bg-white border-b border-gray-3 z-100`}
             style={{
               top: `${topSafeHeight}rpx`,
@@ -146,16 +140,10 @@ export default function PageWrapper({
         >
           {enableScroll ? (
             <ScrollView className="box-border h-full w-full" scrollY>
-              <View
-                className={`box-border ${contentPadding ? "p-30rpx" : "p-0"}`}
-              >
-                {children}
-              </View>
+              <View className={`box-border ${contentPadding ? "p-30rpx" : "p-0"}`}>{children}</View>
             </ScrollView>
           ) : (
-            <View
-              className={`box-border w-full h-full overflow-hidden ${contentPadding ? "p-30rpx" : "p-0"}`}
-            >
+            <View className={`box-border w-full h-full overflow-hidden ${contentPadding ? "p-30rpx" : "p-0"}`}>
               {children}
             </View>
           )}
