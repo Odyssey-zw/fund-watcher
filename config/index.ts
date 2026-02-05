@@ -1,4 +1,5 @@
 import type { UserConfigExport } from "@tarojs/cli";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig } from "@tarojs/cli";
 import { createSwcRegister, getModuleDefaultExport } from "@tarojs/helper";
@@ -12,6 +13,11 @@ setupEnv();
 
 // 打印环境变量和版本号
 logEnv();
+
+// 从 package.json 读取 version，供前端 APP_VERSION 使用
+const pkgPath = resolve(process.cwd(), "package.json");
+const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as { version?: string };
+const packageVersion = pkg.version || "0.0.0";
 
 // https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数
 export default defineConfig(async merge => {
@@ -36,7 +42,9 @@ export default defineConfig(async merge => {
     // 开启多端同步调试
     outputRoot: `dist/${process.env.TARO_ENV}`,
     plugins: ["@taro-hooks/plugin-react", "@tarojs/plugin-html"],
-    defineConstants: {},
+    defineConstants: {
+      __VERSION__: JSON.stringify(packageVersion),
+    },
     copy: {
       patterns: [],
       options: {},

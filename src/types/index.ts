@@ -5,3 +5,7 @@
 // 导出所有类型定义
 export * from "./common";
 export * from "./fund";
+
+declare global {
+  const __VERSION__: string;
+}
