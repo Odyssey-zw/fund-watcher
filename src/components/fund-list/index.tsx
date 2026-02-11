@@ -154,7 +154,7 @@ export default function FundList() {
   ];
 
   return (
-    <PageWrapper title="基金列表" showHeader headerStyle="centered" tabBarHeight={88} contentPadding={false}>
+    <PageWrapper title="基金列表" showHeader headerStyle="centered" contentPadding={false}>
       <View className="px-20rpx py-20rpx">
         {/* Tab 切换 */}
         <View className="mb-20rpx flex gap-20rpx">

@@ -5,9 +5,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 interface PageLayoutInfo {
   topSafeHeight: number; // 顶部安全区域高度（rpx）
   headerHeight: number; // 标题栏高度（rpx），默认88
-  tabBarHeight: number; // 标签栏高度（rpx），默认88
   bottomTabBarHeight: number; // 底部导航栏高度（rpx）
-  contentTopOffset: number; // 内容区域顶部偏移（rpx）= topSafeHeight + headerHeight + tabBarHeight
+  contentTopOffset: number; // 内容区域顶部偏移（rpx）= topSafeHeight + headerHeight
   scrollViewHeight: string; // ScrollView 高度计算字符串
 }
 
@@ -25,8 +24,6 @@ interface PageWrapperProps {
   title?: string;
   showHeader?: boolean;
   headerStyle?: "default" | "centered";
-  showTabBar?: boolean; // 是否显示标签栏
-  tabBarHeight?: number; // 标签栏高度（rpx），默认88
   children: React.ReactNode;
   className?: string;
   backgroundColor?: string;
@@ -38,8 +35,6 @@ export default function PageWrapper({
   title,
   showHeader = false,
   headerStyle = "centered",
-  showTabBar = false,
-  tabBarHeight: customTabBarHeight = 88,
   children,
   className = "",
   backgroundColor = "#fff",
@@ -72,21 +67,19 @@ export default function PageWrapper({
   }, []);
 
   const headerHeight = 88; // 标题栏高度（rpx）
-  const tabBarHeight = showTabBar ? customTabBarHeight : 0; // 标签栏高度（rpx）
-  const contentTopOffset = topSafeHeight + (showHeader ? headerHeight : 0) + tabBarHeight;
-  const scrollViewHeight = `calc(100vh - ${topSafeHeight + (showHeader ? headerHeight : 0) + tabBarHeight + bottomTabBarHeight}rpx)`;
+  const contentTopOffset = topSafeHeight + (showHeader ? headerHeight : 0);
+  const scrollViewHeight = `calc(100vh - ${topSafeHeight + (showHeader ? headerHeight : 0) + bottomTabBarHeight}rpx)`;
 
   const layoutInfo: PageLayoutInfo = {
     topSafeHeight,
     headerHeight: showHeader ? headerHeight : 0,
-    tabBarHeight,
     bottomTabBarHeight,
     contentTopOffset,
     scrollViewHeight,
   };
 
   // 计算中间内容区域的固定高度和顶部偏移
-  const headerTotalHeight = (showHeader ? headerHeight : 0) + tabBarHeight;
+  const headerTotalHeight = showHeader ? headerHeight : 0;
   const contentAreaTop = topSafeHeight + headerTotalHeight;
   const contentAreaHeight = `calc(100vh - ${topSafeHeight + headerTotalHeight + bottomTabBarHeight}rpx)`;
 
@@ -116,17 +109,6 @@ export default function PageWrapper({
               {title}
             </Text>
           </View>
-        )}
-
-        {/* 固定标签栏占位（标签栏内容由子组件提供，使用 fixed 定位） */}
-        {showTabBar && (
-          <View
-            className="pf left-0 right-0 z-99"
-            style={{
-              top: `${topSafeHeight + (showHeader ? headerHeight : 0)}rpx`,
-              height: `${tabBarHeight}rpx`,
-            }}
-          />
         )}
 
         {/* 中间内容区域 - 固定高度，可滚动 */}
