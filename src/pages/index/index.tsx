@@ -17,7 +17,7 @@ const TAB_LIST = [
 ] as const;
 
 export default function Index() {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(1);
 
   useLoad(() => {
     console.log("Main page loaded");
