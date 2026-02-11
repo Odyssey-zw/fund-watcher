@@ -1,0 +1,23 @@
+/**
+ * NutUI-React CSS 变量覆盖
+ * 映射到项目设计令牌，与 app.scss 中的色板保持一致。
+ * 需在 page 设计令牌定义之后 @import。
+ */
+:root,
+page {
+  --nutui-color-primary: var(--blue-6);
+  --nutui-color-primary-stop-1: var(--blue-5);
+  --nutui-color-primary-stop-2: var(--blue-6);
+  --nutui-color-primary-pressed: var(--blue-7);
+
+  --nutui-gray-7: var(--gray-10);
+  --nutui-black-10: var(--gray-6);
+  --nutui-gray-6: var(--gray-6);
+  --nutui-gray-5: var(--gray-2);
+  --nutui-gray-4: var(--gray-2);
+  --nutui-black-3: var(--white);
+  --nutui-gray-3: rgba(0, 0, 0, 0.7);
+  --nutui-gray-2: rgba(0, 0, 0, 0.4);
+  --nutui-black-2: rgba(0, 0, 0, 0.08);
+  --nutui-gray-1: rgba(0, 0, 0, 0.02);
+}
