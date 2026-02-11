@@ -117,7 +117,7 @@ export default function Position() {
     try {
       const result = await Taro.showModal({
         title: "确认删除",
-        content: `确定要删除基金"${fundName}"的持仓记录吗？`,
+        content: `确定要删除基金"${fundName}"的持仓记录吗?`,
         confirmText: "删除",
         cancelText: "取消",
       });

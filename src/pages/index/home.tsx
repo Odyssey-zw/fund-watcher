@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { APP_VERSION } from "~/constants/app";
 
 export default function Home() {
-  const [topPadding, setTopPadding] = useState("92rpx"); // 默认值：44px + 48rpx
+  const [topPadding, setTopPadding] = useState("92rpx"); // 默认值:44px + 48rpx
 
   useEffect(() => {
     try {
@@ -12,7 +12,7 @@ export default function Home() {
 
       // 获取状态栏高度
       const statusBarHeight = windowInfo.statusBarHeight ?? 44;
-      // 转换为 rpx (1px = 2rpx)，并加上额外的48rpx间距
+      // 转换为 rpx (1px = 2rpx),并加上额外的48rpx间距
       const padding = statusBarHeight * 2 + 48;
       setTopPadding(`${padding}rpx`);
     } catch (error) {
@@ -37,7 +37,7 @@ export default function Home() {
       <View>
         <View className="mb-50rpx rounded-24rpx bg-white/95 p-50rpx px-40rpx text-center shadow-lg">
           <Text className="mb-20rpx block text-36rpx text-gray-8 font-bold">欢迎使用基金监控小程序</Text>
-          <Text className="block text-28rpx text-gray-6 leading-relaxed">实时监控基金净值变化，管理您的投资组合</Text>
+          <Text className="block text-28rpx text-gray-6 leading-relaxed">实时监控基金净值变化,管理您的投资组合</Text>
         </View>
 
         <View className="grid grid-cols-2 gap-30rpx">

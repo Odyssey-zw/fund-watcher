@@ -3,11 +3,11 @@ import { BalanceListOutlined, ChartTrendingOutlined, HomeOutlined, UserOutlined 
 import { View } from "@tarojs/components";
 import { useLoad } from "@tarojs/taro";
 import { useState } from "react";
-import FundList from "~/components/fund-list";
-import Home from "~/components/home";
-import Position from "~/components/position";
-import Profile from "~/components/profile";
 import { GRAY_6, PRIMARY_COLOR } from "~/constants/colors";
+import FundList from "./fund-list";
+import Home from "./home";
+import Position from "./position";
+import Profile from "./profile";
 
 const TAB_LIST = [
   { key: "home", text: "首页", icon: <HomeOutlined />, component: Home },

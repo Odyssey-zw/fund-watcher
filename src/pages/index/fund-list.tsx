@@ -53,7 +53,7 @@ export default function FundList() {
     loadFunds(true);
   }, [loadFunds]);
 
-  // 30 秒静默刷新（API 层有 30s 缓存，会复用数据）
+  // 30 秒静默刷新(API 层有 30s 缓存,会复用数据)
   useEffect(() => {
     const intervalId = setInterval(() => {
       loadFunds(false);
