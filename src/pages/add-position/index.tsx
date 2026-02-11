@@ -1,7 +1,9 @@
-import type { FundPosition } from "~/types/fund";
-import { Button, Input, Text, View } from "@tarojs/components";
+import type { FundPosition, FundSearchResult } from "~/types/fund";
+import { Button, Cell, Form, Input } from "@nutui/nutui-react-taro";
+import { Text, View } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { useEffect, useState } from "react";
+import { getHotFunds } from "~/api/fund";
 import { getSinaFundData } from "~/api/fund-internal";
 import { addPosition, getPositions, updatePosition } from "~/api/position";
 import PageWrapper from "~/components/page-wrapper";
@@ -25,6 +27,9 @@ export default function AddPosition() {
   const [buyDate, setBuyDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [hotFundsList, setHotFundsList] = useState<FundSearchResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<FundSearchResult[]>([]);
 
   const searchFundInfo = async (code: string) => {
     if (!isValidFundCode(code)) {
@@ -40,7 +45,7 @@ export default function AddPosition() {
         setFundInfo({
           code,
           name: fundData.name,
-          currentValue: Number.parseFloat(fundData.gsz) || 0,
+          currentValue: Number.parseFloat(fundData.gsz || "0") || 0,
         });
       } else {
         setFundInfo(null);
@@ -82,11 +87,43 @@ export default function AddPosition() {
 
   const handleFundCodeChange = (value: string) => {
     setFundCode(value);
+
+    // 过滤匹配的基金
+    if (value && value.length > 0) {
+      const filtered = hotFundsList.filter(
+        fund => fund.code.includes(value) || fund.name.toLowerCase().includes(value.toLowerCase()),
+      );
+      setFilteredSuggestions(filtered);
+      setShowSuggestions(filtered.length > 0 && value.length < 6);
+    } else {
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
+    }
+
     if (value.length === 6) {
       searchFundInfo(value);
+      setShowSuggestions(false);
     } else {
       setFundInfo(null);
     }
+  };
+
+  const handleSuggestionClick = (fund: FundSearchResult) => {
+    setFundCode(fund.code);
+    setShowSuggestions(false);
+    searchFundInfo(fund.code);
+  };
+
+  const handleSharesChange = (value: string) => {
+    setShares(value);
+  };
+
+  const handleCostChange = (value: string) => {
+    setCost(value);
+  };
+
+  const handleBuyDateChange = (value: string) => {
+    setBuyDate(value);
   };
 
   const handleSubmit = async () => {
@@ -167,6 +204,21 @@ export default function AddPosition() {
     }
   };
 
+  // 加载热门基金列表
+  useEffect(() => {
+    const loadHotFunds = async () => {
+      try {
+        const response = await getHotFunds({ page: 1, pageSize: 1000 });
+        if (response.success && response.data.list) {
+          setHotFundsList(response.data.list);
+        }
+      } catch (error) {
+        console.error("加载热门基金列表失败:", error);
+      }
+    };
+    loadHotFunds();
+  }, []);
+
   // 编辑模式下加载现有持仓数据
   useEffect(() => {
     if (isEditMode && initialFundCode) {
@@ -183,91 +235,141 @@ export default function AddPosition() {
       enableScroll={true}
     >
       <View className="space-y-32rpx">
-        {/* 基金代码输入 */}
-        <View>
-          <Text className="mb-16rpx block text-28rpx text-gray-8 font-500">基金代码</Text>
-          <Input
-            className="h-88rpx w-full border border-gray-300 rounded-8rpx px-24rpx py-32rpx text-28rpx"
-            placeholder="请输入6位基金代码"
-            placeholderStyle="color: #9ca3af; font-size: 28rpx;"
-            value={fundCode}
-            onInput={e => handleFundCodeChange(e.detail.value)}
-            maxlength={6}
-            type="number"
-            disabled={isEditMode}
-          />
-          {searching && <Text className="mt-12rpx block text-24rpx text-gray-5">搜索中...</Text>}
-          {fundInfo && (
-            <View className="mt-16rpx rounded-8rpx bg-blue-50 p-20rpx">
-              <Text className="block text-28rpx text-gray-8 font-500">{fundInfo.name}</Text>
-              <Text className="mt-8rpx block text-24rpx text-gray-6">
-                当前净值: {formatFundValue(fundInfo.currentValue)}
+        <Form>
+          {/* 基金代码输入 */}
+          <Cell>
+            <View className="w-full">
+              <Text className="mb-16rpx block text-28rpx text-gray-8 font-500">
+                基金代码 <Text className="text-red-500">*</Text>
               </Text>
+              <View className="relative">
+                <Input
+                  placeholder="请输入6位基金代码"
+                  value={fundCode}
+                  onChange={handleFundCodeChange}
+                  maxLength={6}
+                  type="number"
+                  disabled={isEditMode}
+                />
+
+                {/* 下拉提示列表 */}
+                {showSuggestions && filteredSuggestions.length > 0 && (
+                  <View className="absolute left-0 right-0 top-full z-10 mt-8rpx max-h-400rpx overflow-y-auto border border-gray-200 rounded-8rpx bg-white shadow-lg">
+                    {filteredSuggestions.slice(0, 10).map(fund => (
+                      <View
+                        key={fund.code}
+                        className="border-b border-gray-100 px-24rpx py-20rpx active:bg-gray-50"
+                        onClick={() => handleSuggestionClick(fund)}
+                      >
+                        <View className="flex items-center justify-between">
+                          <View className="flex-1">
+                            <Text className="block text-28rpx text-gray-8 font-500">{fund.name}</Text>
+                            <Text className="mt-4rpx block text-24rpx text-gray-5">{fund.code}</Text>
+                          </View>
+                          {fund.unitValue && (
+                            <View className="ml-16rpx text-right">
+                              <Text className="block text-26rpx text-gray-7">{formatFundValue(fund.unitValue)}</Text>
+                              {fund.dayGrowthRate != null && (
+                                <Text
+                                  className="mt-4rpx block text-22rpx"
+                                  style={{
+                                    color:
+                                      fund.dayGrowthRate > 0 ? "#f5222d" : fund.dayGrowthRate < 0 ? "#52c41a" : "#666",
+                                  }}
+                                >
+                                  {fund.dayGrowthRate > 0 ? "+" : ""}
+                                  {(fund.dayGrowthRate * 100).toFixed(2)}%
+                                </Text>
+                              )}
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
             </View>
+          </Cell>
+
+          {searching && (
+            <Cell>
+              <Text className="text-24rpx text-gray-5">搜索中...</Text>
+            </Cell>
           )}
-        </View>
 
-        {/* 持有份额输入 */}
-        <View>
-          <Text className="mb-16rpx block text-28rpx text-gray-8 font-500">持有份额</Text>
-          <Input
-            className="h-88rpx w-full border border-gray-300 rounded-8rpx px-24rpx py-32rpx text-28rpx"
-            placeholder="请输入持有份额"
-            placeholderStyle="color: #9ca3af; font-size: 28rpx;"
-            value={shares}
-            onInput={e => setShares(e.detail.value)}
-            type="digit"
-          />
-        </View>
+          {fundInfo && (
+            <Cell className="rounded-8rpx bg-blue-50">
+              <View>
+                <Text className="block text-28rpx text-gray-8 font-500">{fundInfo.name}</Text>
+                <Text className="mt-8rpx block text-24rpx text-gray-6">
+                  当前净值: {formatFundValue(fundInfo.currentValue)}
+                </Text>
+              </View>
+            </Cell>
+          )}
 
-        {/* 成本金额输入 */}
-        <View>
-          <Text className="mb-16rpx block text-28rpx text-gray-8 font-500">成本金额 (元)</Text>
-          <Input
-            className="h-88rpx w-full border border-gray-300 rounded-8rpx px-24rpx py-32rpx text-28rpx"
-            placeholder="请输入总成本金额"
-            placeholderStyle="color: #9ca3af; font-size: 28rpx;"
-            value={cost}
-            onInput={e => setCost(e.detail.value)}
-            type="digit"
-          />
+          {/* 持有份额输入 */}
+          <Cell>
+            <View className="w-full">
+              <Text className="mb-16rpx block text-28rpx text-gray-8 font-500">
+                持有份额 <Text className="text-red-500">*</Text>
+              </Text>
+              <Input placeholder="请输入持有份额" value={shares} onChange={handleSharesChange} type="digit" />
+            </View>
+          </Cell>
+
+          {/* 成本金额输入 */}
+          <Cell>
+            <View className="w-full">
+              <Text className="mb-16rpx block text-28rpx text-gray-8 font-500">
+                成本金额 (元) <Text className="text-red-500">*</Text>
+              </Text>
+              <Input placeholder="请输入总成本金额" value={cost} onChange={handleCostChange} type="digit" />
+            </View>
+          </Cell>
+
           {shares && cost && (
-            <Text className="mt-12rpx block text-24rpx text-gray-5">
-              成本单价: {(Number.parseFloat(cost) / Number.parseFloat(shares)).toFixed(4)}
-            </Text>
+            <Cell>
+              <Text className="text-24rpx text-gray-5">
+                成本单价: {(Number.parseFloat(cost) / Number.parseFloat(shares)).toFixed(4)}
+              </Text>
+            </Cell>
           )}
-        </View>
 
-        {/* 买入日期 */}
-        <View>
-          <Text className="mb-16rpx block text-28rpx text-gray-8 font-500">买入日期</Text>
-          <Input
-            className="h-88rpx w-full border border-gray-300 rounded-8rpx px-24rpx py-32rpx text-28rpx"
-            placeholder="请选择买入日期"
-            placeholderStyle="color: #9ca3af; font-size: 28rpx;"
-            value={buyDate}
-            onInput={e => setBuyDate(e.detail.value)}
-          />
-        </View>
+          {/* 买入日期 */}
+          <Cell>
+            <View className="w-full">
+              <Text className="mb-16rpx block text-28rpx text-gray-8 font-500">
+                买入日期 <Text className="text-red-500">*</Text>
+              </Text>
+              <Input placeholder="请选择买入日期" value={buyDate} onChange={handleBuyDateChange} type="text" />
+            </View>
+          </Cell>
+        </Form>
 
         {/* 提交按钮 */}
         <View className="pt-40rpx">
           <Button
-            className="w-full rounded-12rpx bg-primary-6 py-24rpx text-32rpx text-white"
-            onClick={handleSubmit}
+            type="primary"
+            block
             loading={loading}
             disabled={loading || !fundInfo}
+            onClick={handleSubmit}
+            style={{
+              opacity: loading || !fundInfo ? 0.6 : 1,
+            }}
           >
             {isEditMode ? "更新持仓" : "添加持仓"}
           </Button>
         </View>
 
         {/* 风险提示 */}
-        <View className="rounded-8rpx bg-yellow-50 p-20rpx">
+        <Cell className="rounded-8rpx bg-yellow-50">
           <Text className="block text-24rpx text-orange-600">
             ⚠️ 风险提示: 基金投资有风险，过往业绩不代表未来表现。本功能仅用于记录持仓，不构成投资建议。
           </Text>
-        </View>
+        </Cell>
       </View>
     </PageWrapper>
   );
