@@ -5,7 +5,7 @@
 import type { ApiResponse } from "~/types/common";
 import type { FundPosition } from "~/types/fund";
 import Taro from "@tarojs/taro";
-import { getSinaFundData } from "./fund-internal";
+import { useFundStore } from "~/store/useFundStore";
 
 const STORAGE_KEY = "fund_positions";
 
@@ -17,27 +17,30 @@ export async function getPositions(): Promise<ApiResponse<FundPosition[]>> {
     const storedData = Taro.getStorageSync(STORAGE_KEY);
     const positions: FundPosition[] = storedData || [];
 
-    // 获取最新净值并计算收益
-    const updatedPositions = await Promise.all(
-      positions.map(async position => {
-        const fundData = await getSinaFundData(position.fundCode);
-        if (fundData?.gsz) {
-          const currentValue = Number.parseFloat(fundData.gsz);
-          const marketValue = position.shares * currentValue;
-          const profit = marketValue - position.cost;
-          const profitRate = position.cost > 0 ? profit / position.cost : 0;
+    // 从全局缓存获取基金实时数据
+    const fundCodes = positions.map(p => p.fundCode);
+    const fundStore = useFundStore.getState();
+    const realTimeDataMap = await fundStore.batchGetFundRealTimeData(fundCodes);
 
-          return {
-            ...position,
-            currentValue,
-            marketValue,
-            profit,
-            profitRate,
-          };
-        }
-        return position;
-      }),
-    );
+    // 计算收益
+    const updatedPositions = positions.map(position => {
+      const realTimeData = realTimeDataMap[position.fundCode];
+      if (realTimeData) {
+        const currentValue = realTimeData.currentValue;
+        const marketValue = position.shares * currentValue;
+        const profit = marketValue - position.cost;
+        const profitRate = position.cost > 0 ? profit / position.cost : 0;
+
+        return {
+          ...position,
+          currentValue,
+          marketValue,
+          profit,
+          profitRate,
+        };
+      }
+      return position;
+    });
 
     return {
       code: 200,

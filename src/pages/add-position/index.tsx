@@ -4,9 +4,9 @@ import { Text, View } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { useEffect, useState } from "react";
 import { getHotFunds } from "~/api/fund";
-import { getSinaFundData } from "~/api/fund-internal";
-import { addPosition, getPositions, updatePosition } from "~/api/position";
+import { addPosition, updatePosition } from "~/api/position";
 import PageWrapper from "~/components/page-wrapper";
+import { useFundStore, usePositionStore } from "~/store";
 import { formatFundValue, isValidFundCode } from "~/utils/fundUtils";
 
 interface FundInfo {
@@ -19,6 +19,8 @@ export default function AddPosition() {
   const router = useRouter();
   const { fundCode: initialFundCode, mode } = router.params;
   const isEditMode = mode === "edit";
+  const positionStore = usePositionStore();
+  const fundStore = useFundStore();
 
   const [fundCode, setFundCode] = useState(initialFundCode || "");
   const [fundInfo, setFundInfo] = useState<FundInfo | null>(null);
@@ -39,13 +41,14 @@ export default function AddPosition() {
 
     try {
       setSearching(true);
-      const fundData = await getSinaFundData(code);
+      // 从全局缓存获取基金数据
+      const realTimeData = await fundStore.getFundRealTimeData(code);
 
-      if (fundData && fundData.name) {
+      if (realTimeData && realTimeData.name) {
         setFundInfo({
           code,
-          name: fundData.name,
-          currentValue: Number.parseFloat(fundData.gsz || "0") || 0,
+          name: realTimeData.name,
+          currentValue: realTimeData.currentValue,
         });
       } else {
         setFundInfo(null);
@@ -68,17 +71,18 @@ export default function AddPosition() {
 
   const loadExistingPosition = async () => {
     try {
-      const response = await getPositions();
-      if (response.success) {
-        const position = response.data.find(p => p.fundCode === initialFundCode);
-        if (position) {
-          setFundCode(position.fundCode);
-          setShares(position.shares.toString());
-          setCost(position.cost.toString());
-          setBuyDate(position.buyDate);
-          // 搜索基金信息
-          searchFundInfo(position.fundCode);
-        }
+      // 从 store 获取持仓数据,如果没有则从 API 加载
+      if (positionStore.positions.length === 0) {
+        await positionStore.loadPositions();
+      }
+      const position = positionStore.getPosition(initialFundCode || "");
+      if (position) {
+        setFundCode(position.fundCode);
+        setShares(position.shares.toString());
+        setCost(position.cost.toString());
+        setBuyDate(position.buyDate);
+        // 搜索基金信息
+        searchFundInfo(position.fundCode);
       }
     } catch (error) {
       console.error("加载持仓数据失败:", error);
@@ -179,6 +183,9 @@ export default function AddPosition() {
       }
 
       if (response.success) {
+        // 重新从 API 加载所有数据,确保数据一致性
+        await positionStore.loadAllData();
+
         Taro.showToast({
           title: isEditMode ? "更新成功" : "添加成功",
           icon: "success",

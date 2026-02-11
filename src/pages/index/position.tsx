@@ -1,53 +1,26 @@
-import type { FundPosition } from "~/types/fund";
 import { ArrowDown, ArrowUp, Plus } from "@taroify/icons";
 import { Button, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useEffect, useState } from "react";
-import { deletePosition, getPositions, getPositionSummary } from "~/api/position";
+import { deletePosition } from "~/api/position";
 import PageWrapper from "~/components/page-wrapper";
+import { usePositionStore } from "~/store";
 import { formatAmount, formatFundValue, formatPercentage, getTrendColorStyle } from "~/utils/fundUtils";
 
-interface PositionSummary {
-  totalAssets: number;
-  totalProfit: number;
-  totalProfitRate: number;
-  totalCost: number;
-  positionCount: number;
-}
-
 export default function Position() {
-  const [positions, setPositions] = useState<FundPosition[]>([]);
-  const [summary, setSummary] = useState<PositionSummary>({
-    totalAssets: 0,
-    totalProfit: 0,
-    totalProfitRate: 0,
-    totalCost: 0,
-    positionCount: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  const { positions, summary, loading, loadAllData } = usePositionStore();
   const [sortBy, setSortBy] = useState<"profit" | "profitRate" | "marketValue">("profit");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const loadData = async () => {
     try {
-      setLoading(true);
-      const [positionsRes, summaryRes] = await Promise.all([getPositions(), getPositionSummary()]);
-
-      if (positionsRes.success) {
-        setPositions(positionsRes.data);
-      }
-
-      if (summaryRes.success) {
-        setSummary(summaryRes.data);
-      }
+      await loadAllData();
     } catch (error) {
       console.error("加载持仓数据失败:", error);
       Taro.showToast({
         title: "加载失败",
         icon: "none",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -125,12 +98,15 @@ export default function Position() {
       if (result.confirm) {
         const response = await deletePosition(fundCode);
         if (response.success) {
+          // 更新 store 中的数据
+          usePositionStore.getState().removePosition(fundCode);
+          // 重新加载汇总数据
+          await loadData();
+
           Taro.showToast({
             title: "删除成功",
             icon: "success",
           });
-          // 重新加载数据
-          loadData();
         } else {
           Taro.showToast({
             title: "删除失败",

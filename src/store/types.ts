@@ -5,11 +5,33 @@
 import type { FundPosition, FundSearchResult } from "~/types/fund";
 
 /**
+ * 持仓汇总信息
+ */
+export interface PositionSummary {
+  /** 总资产 */
+  totalAssets: number;
+  /** 总收益 */
+  totalProfit: number;
+  /** 总收益率 */
+  totalProfitRate: number;
+  /** 总成本 */
+  totalCost: number;
+  /** 持仓数量 */
+  positionCount: number;
+}
+
+/**
  * 用户持仓状态
  */
 export interface PositionState {
   /** 持仓列表 */
   positions: FundPosition[];
+  /** 持仓汇总 */
+  summary: PositionSummary;
+  /** 加载状态 */
+  loading: boolean;
+  /** 设置加载状态 */
+  setLoading: (loading: boolean) => void;
   /** 添加持仓 */
   addPosition: (position: FundPosition) => void;
   /** 更新持仓 */
@@ -20,8 +42,16 @@ export interface PositionState {
   clearPositions: () => void;
   /** 批量设置持仓 */
   setPositions: (positions: FundPosition[]) => void;
+  /** 设置汇总信息 */
+  setSummary: (summary: PositionSummary) => void;
   /** 根据基金代码获取持仓 */
   getPosition: (fundCode: string) => FundPosition | undefined;
+  /** 从 API 加载持仓数据 */
+  loadPositions: () => Promise<void>;
+  /** 从 API 加载汇总数据 */
+  loadSummary: () => Promise<void>;
+  /** 加载所有数据 */
+  loadAllData: () => Promise<void>;
 }
 
 /**
@@ -47,6 +77,26 @@ export interface AppState {
 }
 
 /**
+ * 基金实时数据
+ */
+export interface FundRealTimeData {
+  /** 基金代码 */
+  code: string;
+  /** 基金名称 */
+  name: string;
+  /** 当前净值 */
+  currentValue: number;
+  /** 估算净值 */
+  estimateValue?: number;
+  /** 估算涨跌幅 */
+  estimateChange?: number;
+  /** 日涨跌幅 */
+  dayGrowthRate?: number;
+  /** 更新时间戳 */
+  updateTime: number;
+}
+
+/**
  * 基金数据状态
  */
 export interface FundState {
@@ -68,4 +118,14 @@ export interface FundState {
   clearSearchHistory: () => void;
   /** 删除单条搜索历史 */
   removeSearchHistory: (keyword: string) => void;
+  /** 基金实时数据缓存 (fundCode -> FundRealTimeData) */
+  realTimeDataCache: Record<string, FundRealTimeData>;
+  /** 获取基金实时数据 (从缓存或API) */
+  getFundRealTimeData: (fundCode: string, forceRefresh?: boolean) => Promise<FundRealTimeData | null>;
+  /** 批量获取基金实时数据 */
+  batchGetFundRealTimeData: (fundCodes: string[], forceRefresh?: boolean) => Promise<Record<string, FundRealTimeData>>;
+  /** 设置基金实时数据到缓存 */
+  setFundRealTimeData: (fundCode: string, data: FundRealTimeData) => void;
+  /** 清空实时数据缓存 */
+  clearRealTimeDataCache: () => void;
 }
