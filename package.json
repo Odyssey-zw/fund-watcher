@@ -1,6 +1,6 @@
 {
   "name": "fund-watcher",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "packageManager": "pnpm@10.2.1",
   "description": "基于 Taro + React 的基金监控小程序，支持基金净值查询、收益分析、持仓管理等功能。A fund monitoring mini-program based on Taro + React, featuring fund value inquiry, profit analysis, position management and more.",
