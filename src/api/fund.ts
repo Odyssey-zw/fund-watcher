@@ -2,20 +2,59 @@
  * 基金相关 API
  */
 
+import type { SinaFundData } from "./fund-internal";
 import type { ApiResponse, PaginationParams, PaginationResult } from "~/types/common";
 import type { FundChartData, FundChartPeriod, FundDetailPage, FundSearchResult } from "~/types/fund";
 import Taro from "@tarojs/taro";
 import { FUND_API_URLS, HOT_FUND_CODES } from "~/constants/fund";
 import { getSinaFundData } from "./fund-internal";
 
+const isDev = process.env.NODE_ENV !== "production";
+const HOT_FUNDS_CACHE_MS = 30_000; // 30 秒内分页/刷新复用同一份数据，减少重复请求
+
+let hotFundsCache: { list: FundSearchResult[]; timestamp: number } | null = null;
+
+function getCachedHotFunds(): FundSearchResult[] | null {
+  if (!hotFundsCache) {
+    return null;
+  }
+  if (Date.now() - hotFundsCache.timestamp > HOT_FUNDS_CACHE_MS) {
+    hotFundsCache = null;
+    return null;
+  }
+  return hotFundsCache.list;
+}
+
 /**
  * 获取热门基金列表（返回列表页所需的净值与涨跌幅）
+ * 30 秒内多次请求（分页/刷新）会复用缓存，避免重复拉取全部基金。
  * @param params 分页参数
  * @returns 热门基金列表
  */
 export async function getHotFunds(params: PaginationParams): Promise<ApiResponse<PaginationResult<FundSearchResult>>> {
   try {
-    console.log("[API] 开始获取热门基金数据...");
+    const cached = getCachedHotFunds();
+    if (cached) {
+      const startIndex = (params.page - 1) * params.pageSize;
+      const endIndex = startIndex + params.pageSize;
+      const paginatedData = cached.slice(startIndex, endIndex);
+      return {
+        code: 200,
+        message: "success",
+        success: true,
+        data: {
+          list: paginatedData,
+          total: cached.length,
+          page: params.page,
+          pageSize: params.pageSize,
+          totalPages: Math.ceil(cached.length / params.pageSize),
+        },
+      };
+    }
+
+    if (isDev) {
+      console.log("[API] 开始获取热门基金数据...");
+    }
 
     // 批量获取基金数据
     const fundPromises = HOT_FUND_CODES.map(code => getSinaFundData(code));
@@ -27,18 +66,17 @@ export async function getHotFunds(params: PaginationParams): Promise<ApiResponse
       .filter((fund): fund is FundSearchResult => fund !== null)
       .map(fund => ({
         ...fund,
-        // 保留一些模拟数据字段（这些需要从其他接口获取）
         tags: [],
         returnAfterAddition: undefined,
         durationDays: undefined,
-        currentValue: {
-          // 这些数据需要从其他接口获取，暂时留空
-        },
+        currentValue: {},
       }));
 
-    console.log(`[API] 成功获取 ${funds.length} 只基金数据`);
+    hotFundsCache = { list: funds, timestamp: Date.now() };
+    if (isDev) {
+      console.log(`[API] 成功获取 ${funds.length} 只基金数据`);
+    }
 
-    // 实现分页
     const startIndex = (params.page - 1) * params.pageSize;
     const endIndex = startIndex + params.pageSize;
     const paginatedData = funds.slice(startIndex, endIndex);
@@ -57,7 +95,6 @@ export async function getHotFunds(params: PaginationParams): Promise<ApiResponse
     };
   } catch (error) {
     console.error("获取热门基金失败:", error);
-    // 失败时返回空列表
     return {
       code: 500,
       message: "获取热门基金失败",
@@ -80,7 +117,9 @@ export async function getHotFunds(params: PaginationParams): Promise<ApiResponse
  */
 export async function getFundDetail(fundCode: string): Promise<ApiResponse<FundDetailPage>> {
   try {
-    console.log(`[API] 开始获取基金${fundCode}详情数据...`);
+    if (isDev) {
+      console.log(`[API] 开始获取基金${fundCode}详情数据...`);
+    }
 
     // 获取基金实时数据
     const sinaData = await getSinaFundData(fundCode);
@@ -134,7 +173,9 @@ export async function getFundDetail(fundCode: string): Promise<ApiResponse<FundD
       },
     };
 
-    console.log(`[API] 成功获取基金${fundCode}详情数据`, fundDetail);
+    if (isDev) {
+      console.log(`[API] 成功获取基金${fundCode}详情数据`, fundDetail);
+    }
 
     return {
       code: 200,
@@ -165,7 +206,9 @@ export async function getFundChartData(
 ): Promise<ApiResponse<FundChartData[]>> {
   try {
     const url = FUND_API_URLS.getEastmoneyHistoryUrl(fundCode);
-    console.log("[API] 获取历史净值 URL:", url);
+    if (isDev) {
+      console.log("[API] 获取历史净值 URL:", url);
+    }
 
     const response = await Taro.request<string>({
       url,
@@ -173,10 +216,10 @@ export async function getFundChartData(
       dataType: "text",
     });
     const html = (response.data as unknown as string) || "";
-    console.log("[API] 历史净值原始响应前 300 字符:", html.slice(0, 300));
-
     const chartData = parseEastmoneyHistoryToChartData(html, period);
-    console.log("[API] 解析后的历史净值点数:", chartData.length);
+    if (isDev) {
+      console.log("[API] 解析后的历史净值点数:", chartData.length);
+    }
 
     return {
       code: 200,
@@ -384,20 +427,19 @@ async function getFundExtraInfoFromEastmoney(fundCode: string): Promise<{
 /**
  * 将新浪财经数据格式转换为 FundSearchResult
  */
-function convertSinaDataToFundSearchResult(sinaData: any): FundSearchResult | null {
-  if (!sinaData || !sinaData.fundcode) {
+function convertSinaDataToFundSearchResult(sinaData: SinaFundData | null): FundSearchResult | null {
+  if (!sinaData?.fundcode) {
     return null;
   }
 
   return {
     code: sinaData.fundcode,
-    name: sinaData.name || "",
-    type: inferFundType(sinaData.name || ""),
+    name: sinaData.name ?? "",
+    type: inferFundType(sinaData.name ?? ""),
     unitValue: sinaData.dwjz ? Number.parseFloat(sinaData.dwjz) : undefined,
     estimateValue: sinaData.gsz ? Number.parseFloat(sinaData.gsz) : undefined,
     estimateChange: sinaData.gszzl ? Number.parseFloat(sinaData.gszzl) / 100 : undefined,
-    estimateTime: sinaData.gztime || undefined, // 估值时间，如 "2026-01-30 15:00"
-    // 注意：新浪财经 API 不直接提供日涨跌幅，需要从其他接口获取
+    estimateTime: sinaData.gztime ?? undefined,
     dayGrowthRate: undefined,
     tags: [],
   };

@@ -2,7 +2,7 @@ import type { FundSearchResult } from "~/types/fund";
 import { ArrowDown, ArrowUp } from "@taroify/icons";
 import { ScrollView, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getHotFunds } from "~/api/fund";
 import PageWrapper, { usePageLayout } from "~/components/page-wrapper";
 import { formatFundValue, formatPercentage, getTrendColorStyle } from "~/utils/fundUtils";
@@ -32,7 +32,7 @@ export default function FundList() {
   const [sortBy, setSortBy] = useState<"unitValue" | "estimate" | "return">("return");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const loadFunds = async (page: number = currentPage, showLoading = true) => {
+  const loadFunds = useCallback(async (page: number, showLoading = true) => {
     try {
       if (showLoading) {
         setLoading(true);
@@ -59,29 +59,25 @@ export default function FundList() {
         setLoading(false);
       }
     }
-  };
-
-  useEffect(() => {
-    loadFunds(1);
   }, []);
 
-  // 每30秒自动刷新数据
+  useEffect(() => {
+    loadFunds(1, true);
+  }, [loadFunds]);
+
+  // 30 秒静默刷新（API 层有 30s 缓存，会复用数据）
   useEffect(() => {
     const intervalId = setInterval(() => {
-      loadFunds(1, false); // 不显示加载状态，静默刷新
-    }, 30000); // 30秒 = 30000毫秒
-
-    // 组件卸载时清理定时器
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
+      loadFunds(1, false);
+    }, 30_000);
+    return () => clearInterval(intervalId);
+  }, [loadFunds]);
 
   useEffect(() => {
     if (currentPage > 1) {
-      loadFunds(currentPage);
+      loadFunds(currentPage, true);
     }
-  }, [currentPage]);
+  }, [currentPage, loadFunds]);
 
   const handleSort = (field: typeof sortBy) => {
     if (sortBy === field) {
