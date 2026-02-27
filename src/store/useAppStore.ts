@@ -8,13 +8,13 @@ import { createTaroPersist } from "./middleware/persist";
 export const useAppStore = create<AppState>(
   createTaroPersist(
     set => ({
-      currentTab: 0,
+      activeTabKey: "home",
       showTabBar: true,
       theme: "light",
       isFirstLaunch: true,
 
-      setCurrentTab: tab => {
-        set({ currentTab: tab });
+      setActiveTabKey: tab => {
+        set({ activeTabKey: tab });
       },
 
       setShowTabBar: show => {
@@ -32,7 +32,7 @@ export const useAppStore = create<AppState>(
     {
       name: "fund-watcher-app",
       partialize: state => ({
-        currentTab: state.currentTab,
+        activeTabKey: state.activeTabKey,
         theme: state.theme,
         isFirstLaunch: state.isFirstLaunch,
         showTabBar: state.showTabBar,

@@ -55,13 +55,18 @@ export interface PositionState {
 }
 
 /**
+ * Tab 标识符
+ */
+export type TabKey = "home" | "fund" | "position" | "profile";
+
+/**
  * 应用全局状态
  */
 export interface AppState {
   /** 当前选中的 tab */
-  currentTab: number;
+  activeTabKey: TabKey;
   /** 设置当前 tab */
-  setCurrentTab: (tab: number) => void;
+  setActiveTabKey: (tab: TabKey) => void;
   /** 是否显示底部导航栏 */
   showTabBar: boolean;
   /** 设置是否显示底部导航栏 */

@@ -1,47 +1,32 @@
-import { Tabbar } from "@nutui/nutui-react-taro";
-import { BalanceListOutlined, ChartTrendingOutlined, HomeOutlined, UserOutlined } from "@taroify/icons";
-import { View } from "@tarojs/components";
-import { useLoad } from "@tarojs/taro";
-import { useState } from "react";
-import { GRAY_6, PRIMARY_COLOR } from "~/constants/colors";
-import FundList from "./fund-list";
-import Home from "./home";
-import Position from "./position";
-import Profile from "./profile";
-
-const TAB_LIST = [
-  { key: "home", text: "首页", icon: <HomeOutlined />, component: Home },
-  { key: "fund", text: "基金", icon: <ChartTrendingOutlined />, component: FundList },
-  { key: "position", text: "持仓", icon: <BalanceListOutlined />, component: Position },
-  { key: "profile", text: "我的", icon: <UserOutlined />, component: Profile },
-] as const;
+import Taro from "@tarojs/taro";
+import { useEffect } from "react";
+import { useAppStore } from "~/store/useAppStore";
 
 export default function Index() {
-  const [activeIndex, setActiveIndex] = useState(1);
+  const activeTabKey = useAppStore(state => state.activeTabKey);
 
-  useLoad(() => {
-    console.log("Main page loaded");
-  });
+  useEffect(() => {
+    // 根据 store 中的 activeTabKey 重定向到对应页面
+    const pathMap = {
+      home: "/pages/home/index",
+      fund: "/pages/fund-list/index",
+      position: "/pages/position/index",
+      profile: "/pages/profile/index",
+    };
 
-  const ActiveComponent = TAB_LIST[activeIndex]?.component ?? Home;
+    const targetPath = pathMap[activeTabKey] || "/pages/home/index";
 
-  return (
-    <View className="index-page" style={{ height: "100vh", overflow: "hidden" }}>
-      <View className="index-page__content" style={{ height: "100%", overflow: "auto" }}>
-        <ActiveComponent />
-      </View>
-      <Tabbar
-        fixed
-        safeArea
-        value={activeIndex}
-        onSwitch={setActiveIndex}
-        activeColor={PRIMARY_COLOR}
-        inactiveColor={GRAY_6}
-      >
-        {TAB_LIST.map(tab => (
-          <Tabbar.Item key={tab.key} title={tab.text} icon={tab.icon} />
-        ))}
-      </Tabbar>
-    </View>
-  );
+    Taro.redirectTo({
+      url: targetPath,
+    }).catch(() => {
+      // 如果重定向失败,尝试使用 switchTab
+      Taro.switchTab({
+        url: targetPath,
+      }).catch(error => {
+        console.error("Navigation failed:", error);
+      });
+    });
+  }, [activeTabKey]);
+
+  return null;
 }
