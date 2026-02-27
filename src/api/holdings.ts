@@ -1,5 +1,5 @@
 /**
- * 持仓相关 API
+ * 持仓（Holdings）相关 API
  */
 
 import type { ApiResponse } from "~/types/common";
@@ -7,46 +7,46 @@ import type { FundPosition } from "~/types/fund";
 import Taro from "@tarojs/taro";
 import { useFundStore } from "~/store/useFundStore";
 
-const STORAGE_KEY = "fund_positions";
+const STORAGE_KEY = "fund_holdings";
 
 /**
  * 获取用户持仓列表
  */
-export async function getPositions(): Promise<ApiResponse<FundPosition[]>> {
+export async function getHoldings(): Promise<ApiResponse<FundPosition[]>> {
   try {
     const storedData = Taro.getStorageSync(STORAGE_KEY);
-    const positions: FundPosition[] = storedData || [];
+    const holdings: FundPosition[] = storedData || [];
 
     // 从全局缓存获取基金实时数据
-    const fundCodes = positions.map(p => p.fundCode);
+    const fundCodes = holdings.map(h => h.fundCode);
     const fundStore = useFundStore.getState();
     const realTimeDataMap = await fundStore.batchGetFundRealTimeData(fundCodes);
 
     // 计算收益
-    const updatedPositions = positions.map(position => {
-      const realTimeData = realTimeDataMap[position.fundCode];
+    const updatedHoldings = holdings.map(holding => {
+      const realTimeData = realTimeDataMap[holding.fundCode];
       if (realTimeData) {
         const currentValue = realTimeData.currentValue;
-        const marketValue = position.shares * currentValue;
-        const profit = marketValue - position.cost;
-        const profitRate = position.cost > 0 ? profit / position.cost : 0;
+        const marketValue = holding.shares * currentValue;
+        const profit = marketValue - holding.cost;
+        const profitRate = holding.cost > 0 ? profit / holding.cost : 0;
 
         return {
-          ...position,
+          ...holding,
           currentValue,
           marketValue,
           profit,
           profitRate,
         };
       }
-      return position;
+      return holding;
     });
 
     return {
       code: 200,
       message: "success",
       success: true,
-      data: updatedPositions,
+      data: updatedHoldings,
     };
   } catch (error) {
     console.error("获取持仓列表失败:", error);
@@ -62,34 +62,34 @@ export async function getPositions(): Promise<ApiResponse<FundPosition[]>> {
 /**
  * 添加持仓
  */
-export async function addPosition(
-  position: Omit<FundPosition, "currentValue" | "marketValue" | "profit" | "profitRate">,
+export async function addHolding(
+  holding: Omit<FundPosition, "currentValue" | "marketValue" | "profit" | "profitRate">,
 ): Promise<ApiResponse<boolean>> {
   try {
     const storedData = Taro.getStorageSync(STORAGE_KEY);
-    const positions: FundPosition[] = storedData || [];
+    const holdings: FundPosition[] = storedData || [];
 
     // 检查是否已存在相同基金的持仓
-    const existingIndex = positions.findIndex(p => p.fundCode === position.fundCode);
+    const existingIndex = holdings.findIndex(h => h.fundCode === holding.fundCode);
 
     if (existingIndex >= 0) {
       // 更新现有持仓（合并份额和成本）
-      const existing = positions[existingIndex];
-      const totalShares = existing.shares + position.shares;
-      const totalCost = existing.cost + position.cost;
+      const existing = holdings[existingIndex];
+      const totalShares = existing.shares + holding.shares;
+      const totalCost = existing.cost + holding.cost;
 
-      positions[existingIndex] = {
+      holdings[existingIndex] = {
         ...existing,
         shares: totalShares,
         cost: totalCost,
-        buyDate: position.buyDate, // 使用最新的买入日期
+        buyDate: holding.buyDate, // 使用最新的买入日期
       };
     } else {
       // 添加新持仓
-      positions.push(position as FundPosition);
+      holdings.push(holding as FundPosition);
     }
 
-    Taro.setStorageSync(STORAGE_KEY, positions);
+    Taro.setStorageSync(STORAGE_KEY, holdings);
 
     return {
       code: 200,
@@ -111,15 +111,15 @@ export async function addPosition(
 /**
  * 更新持仓
  */
-export async function updatePosition(fundCode: string, updates: Partial<FundPosition>): Promise<ApiResponse<boolean>> {
+export async function updateHolding(fundCode: string, updates: Partial<FundPosition>): Promise<ApiResponse<boolean>> {
   try {
     const storedData = Taro.getStorageSync(STORAGE_KEY);
-    const positions: FundPosition[] = storedData || [];
+    const holdings: FundPosition[] = storedData || [];
 
-    const index = positions.findIndex(p => p.fundCode === fundCode);
+    const index = holdings.findIndex(h => h.fundCode === fundCode);
     if (index >= 0) {
-      positions[index] = { ...positions[index], ...updates };
-      Taro.setStorageSync(STORAGE_KEY, positions);
+      holdings[index] = { ...holdings[index], ...updates };
+      Taro.setStorageSync(STORAGE_KEY, holdings);
 
       return {
         code: 200,
@@ -149,13 +149,13 @@ export async function updatePosition(fundCode: string, updates: Partial<FundPosi
 /**
  * 删除持仓
  */
-export async function deletePosition(fundCode: string): Promise<ApiResponse<boolean>> {
+export async function deleteHolding(fundCode: string): Promise<ApiResponse<boolean>> {
   try {
     const storedData = Taro.getStorageSync(STORAGE_KEY);
-    const positions: FundPosition[] = storedData || [];
+    const holdings: FundPosition[] = storedData || [];
 
-    const filteredPositions = positions.filter(p => p.fundCode !== fundCode);
-    Taro.setStorageSync(STORAGE_KEY, filteredPositions);
+    const filteredHoldings = holdings.filter(h => h.fundCode !== fundCode);
+    Taro.setStorageSync(STORAGE_KEY, filteredHoldings);
 
     return {
       code: 200,
@@ -177,7 +177,7 @@ export async function deletePosition(fundCode: string): Promise<ApiResponse<bool
 /**
  * 清空所有持仓
  */
-export async function clearAllPositions(): Promise<ApiResponse<boolean>> {
+export async function clearAllHoldings(): Promise<ApiResponse<boolean>> {
   try {
     Taro.removeStorageSync(STORAGE_KEY);
 
@@ -201,24 +201,24 @@ export async function clearAllPositions(): Promise<ApiResponse<boolean>> {
 /**
  * 获取持仓统计信息
  */
-export async function getPositionSummary(): Promise<
+export async function getHoldingsSummary(): Promise<
   ApiResponse<{
     totalAssets: number;
     totalProfit: number;
     totalProfitRate: number;
     totalCost: number;
-    positionCount: number;
+    holdingsCount: number;
   }>
 > {
   try {
-    const response = await getPositions();
+    const response = await getHoldings();
     if (!response.success) {
       throw new Error("获取持仓列表失败");
     }
 
-    const positions = response.data;
-    const totalAssets = positions.reduce((sum, p) => sum + (p.marketValue || 0), 0);
-    const totalCost = positions.reduce((sum, p) => sum + p.cost, 0);
+    const holdings = response.data;
+    const totalAssets = holdings.reduce((sum, h) => sum + (h.marketValue || 0), 0);
+    const totalCost = holdings.reduce((sum, h) => sum + h.cost, 0);
     const totalProfit = totalAssets - totalCost;
     const totalProfitRate = totalCost > 0 ? totalProfit / totalCost : 0;
 
@@ -231,7 +231,7 @@ export async function getPositionSummary(): Promise<
         totalProfit,
         totalProfitRate,
         totalCost,
-        positionCount: positions.length,
+        holdingsCount: holdings.length,
       },
     };
   } catch (error) {
@@ -245,7 +245,7 @@ export async function getPositionSummary(): Promise<
         totalProfit: 0,
         totalProfitRate: 0,
         totalCost: 0,
-        positionCount: 0,
+        holdingsCount: 0,
       },
     };
   }

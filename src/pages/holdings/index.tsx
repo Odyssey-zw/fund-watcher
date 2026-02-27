@@ -2,13 +2,13 @@ import { ArrowDown, ArrowUp, Plus } from "@taroify/icons";
 import { Button, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useEffect, useState } from "react";
-import { deletePosition } from "~/api/position";
+import { deleteHolding } from "~/api/holdings";
 import PageWrapper from "~/components/page-wrapper";
-import { usePositionStore } from "~/store";
+import { useHoldingsStore } from "~/store";
 import { formatAmount, formatFundValue, formatPercentage, getTrendColorStyle } from "~/utils/fundUtils";
 
-export default function PositionPage() {
-  const { positions, summary, loading, loadAllData } = usePositionStore();
+export default function HoldingsPage() {
+  const { holdings, summary, loading, loadAllData } = useHoldingsStore();
   const [sortBy, setSortBy] = useState<"profit" | "profitRate" | "marketValue">("profit");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -45,7 +45,7 @@ export default function PositionPage() {
     }
   };
 
-  const sortedPositions = [...positions].sort((a, b) => {
+  const sortedHoldings = [...holdings].sort((a, b) => {
     let aVal = 0;
     let bVal = 0;
 
@@ -67,15 +67,15 @@ export default function PositionPage() {
     return sortOrder === "desc" ? bVal - aVal : aVal - bVal;
   });
 
-  const handleAddPosition = () => {
+  const handleAddHolding = () => {
     Taro.navigateTo({
-      url: "/pages/add-position/index",
+      url: "/pages/add-holdings/index",
     });
   };
 
-  const handleEditPosition = (fundCode: string) => {
+  const handleEditHolding = (fundCode: string) => {
     Taro.navigateTo({
-      url: `/pages/add-position/index?fundCode=${fundCode}&mode=edit`,
+      url: `/pages/add-holdings/index?fundCode=${fundCode}&mode=edit`,
     });
   };
 
@@ -85,7 +85,7 @@ export default function PositionPage() {
     });
   };
 
-  const handleDeletePosition = async (fundCode: string, fundName: string) => {
+  const handleDeleteHolding = async (fundCode: string, fundName: string) => {
     try {
       const result = await Taro.showModal({
         title: "确认删除",
@@ -95,9 +95,9 @@ export default function PositionPage() {
       });
 
       if (result.confirm) {
-        const response = await deletePosition(fundCode);
+        const response = await deleteHolding(fundCode);
         if (response.success) {
-          usePositionStore.getState().removePosition(fundCode);
+          useHoldingsStore.getState().removeHolding(fundCode);
           await loadData();
 
           Taro.showToast({
@@ -161,11 +161,11 @@ export default function PositionPage() {
             </View>
           </View>
 
-          {positions.length === 0 ? (
+          {holdings.length === 0 ? (
             <View className="p-60rpx text-center">
               <View className="mb-40rpx text-120rpx text-gray-3">📈</View>
               <Text className="mb-40rpx block text-32rpx text-gray-5">暂无持仓记录</Text>
-              <Button className="rounded-full bg-primary-6 px-60rpx py-20rpx text-white" onClick={handleAddPosition}>
+              <Button className="rounded-full bg-primary-6 px-60rpx py-20rpx text-white" onClick={handleAddHolding}>
                 <Plus className="mr-10rpx" />
                 添加持仓
               </Button>
@@ -174,13 +174,13 @@ export default function PositionPage() {
             <>
               <View className="flex items-center justify-between border-b border-gray-200 bg-white p-30rpx">
                 <Text className="text-28rpx text-gray-6">
-                  共{summary.positionCount}
+                  共{summary.holdingsCount}
                   只基金
                 </Text>
                 <Button
                   size="mini"
                   className="rounded-full bg-primary-6 px-20rpx py-10rpx text-24rpx text-white"
-                  onClick={handleAddPosition}
+                  onClick={handleAddHolding}
                 >
                   <Plus className="mr-8rpx" />
                   添加
@@ -213,45 +213,45 @@ export default function PositionPage() {
               </View>
 
               <View>
-                {sortedPositions.map(position => (
-                  <View key={position.fundCode} className="border-b border-gray-200 bg-white px-30rpx py-24rpx">
+                {sortedHoldings.map(holding => (
+                  <View key={holding.fundCode} className="border-b border-gray-200 bg-white px-30rpx py-24rpx">
                     <View
                       className="flex cursor-pointer items-center"
-                      onClick={() => handleViewDetail(position.fundCode)}
+                      onClick={() => handleViewDetail(holding.fundCode)}
                     >
                       <View className="w-200rpx pr-20rpx">
                         <Text className="mb-8rpx block overflow-hidden text-ellipsis whitespace-nowrap text-28rpx text-gray-8 font-500">
-                          {position.fundName}
+                          {holding.fundName}
                         </Text>
-                        <Text className="mb-8rpx block text-24rpx text-gray-5">{position.fundCode}</Text>
+                        <Text className="mb-8rpx block text-24rpx text-gray-5">{holding.fundCode}</Text>
                         <Text className="text-22rpx text-gray-4">
                           持有
-                          {formatAmount(position.shares)}份
+                          {formatAmount(holding.shares)}份
                         </Text>
                       </View>
 
                       <View className="flex-1 text-center">
                         <Text className="mb-8rpx block text-28rpx text-gray-8 font-500">
-                          ¥{formatAmount(position.marketValue || 0)}
+                          ¥{formatAmount(holding.marketValue || 0)}
                         </Text>
                         <Text className="text-24rpx text-gray-5">
                           净值
-                          {formatFundValue(position.currentValue || 0)}
+                          {formatFundValue(holding.currentValue || 0)}
                         </Text>
                       </View>
 
                       <View className="flex-1 text-center">
                         <Text
                           className="mb-8rpx block text-28rpx font-500"
-                          style={getTrendColorStyle(position.profit || 0)}
+                          style={getTrendColorStyle(holding.profit || 0)}
                         >
-                          {(position.profit || 0) >= 0 ? "+" : ""}¥{formatAmount(position.profit || 0)}
+                          {(holding.profit || 0) >= 0 ? "+" : ""}¥{formatAmount(holding.profit || 0)}
                         </Text>
                       </View>
 
                       <View className="flex-1 text-center">
-                        <Text className="text-28rpx font-500" style={getTrendColorStyle(position.profitRate || 0)}>
-                          {formatPercentage(position.profitRate || 0)}
+                        <Text className="text-28rpx font-500" style={getTrendColorStyle(holding.profitRate || 0)}>
+                          {formatPercentage(holding.profitRate || 0)}
                         </Text>
                       </View>
                     </View>
@@ -262,7 +262,7 @@ export default function PositionPage() {
                         className="mr-16rpx rounded bg-gray-100 px-24rpx py-8rpx text-24rpx text-gray-6"
                         onClick={e => {
                           e.stopPropagation();
-                          handleEditPosition(position.fundCode);
+                          handleEditHolding(holding.fundCode);
                         }}
                       >
                         编辑
@@ -272,7 +272,7 @@ export default function PositionPage() {
                         className="rounded bg-red-100 px-24rpx py-8rpx text-24rpx text-red-600"
                         onClick={e => {
                           e.stopPropagation();
-                          handleDeletePosition(position.fundCode, position.fundName);
+                          handleDeleteHolding(holding.fundCode, holding.fundName);
                         }}
                       >
                         删除

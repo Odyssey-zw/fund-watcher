@@ -5,4 +5,4 @@
 export * from "./types";
 export * from "./useAppStore";
 export * from "./useFundStore";
-export * from "./usePositionStore";
+export * from "./useHoldingsStore";

@@ -4,9 +4,9 @@ import { Text, View } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { useEffect, useState } from "react";
 import { getHotFunds } from "~/api/fund";
-import { addPosition, updatePosition } from "~/api/position";
+import { addHolding, updateHolding } from "~/api/holdings";
 import PageWrapper from "~/components/page-wrapper";
-import { useFundStore, usePositionStore } from "~/store";
+import { useFundStore, useHoldingsStore } from "~/store";
 import { formatFundValue, isValidFundCode } from "~/utils/fundUtils";
 
 interface FundInfo {
@@ -15,11 +15,11 @@ interface FundInfo {
   currentValue: number;
 }
 
-export default function AddPosition() {
+export default function AddHoldings() {
   const router = useRouter();
   const { fundCode: initialFundCode, mode } = router.params;
   const isEditMode = mode === "edit";
-  const positionStore = usePositionStore();
+  const holdingsStore = useHoldingsStore();
   const fundStore = useFundStore();
 
   const [fundCode, setFundCode] = useState(initialFundCode || "");
@@ -69,20 +69,20 @@ export default function AddPosition() {
     }
   };
 
-  const loadExistingPosition = async () => {
+  const loadExistingHolding = async () => {
     try {
       // 从 store 获取持仓数据,如果没有则从 API 加载
-      if (positionStore.positions.length === 0) {
-        await positionStore.loadPositions();
+      if (holdingsStore.holdings.length === 0) {
+        await holdingsStore.loadHoldings();
       }
-      const position = positionStore.getPosition(initialFundCode || "");
-      if (position) {
-        setFundCode(position.fundCode);
-        setShares(position.shares.toString());
-        setCost(position.cost.toString());
-        setBuyDate(position.buyDate);
+      const holding = holdingsStore.getHolding(initialFundCode || "");
+      if (holding) {
+        setFundCode(holding.fundCode);
+        setShares(holding.shares.toString());
+        setCost(holding.cost.toString());
+        setBuyDate(holding.buyDate);
         // 搜索基金信息
-        searchFundInfo(position.fundCode);
+        searchFundInfo(holding.fundCode);
       }
     } catch (error) {
       console.error("加载持仓数据失败:", error);
@@ -167,7 +167,7 @@ export default function AddPosition() {
     try {
       setLoading(true);
 
-      const positionData: Omit<FundPosition, "currentValue" | "marketValue" | "profit" | "profitRate"> = {
+      const holdingData: Omit<FundPosition, "currentValue" | "marketValue" | "profit" | "profitRate"> = {
         fundCode: fundInfo.code,
         fundName: fundInfo.name,
         shares: Number.parseFloat(shares),
@@ -177,14 +177,14 @@ export default function AddPosition() {
 
       let response;
       if (isEditMode) {
-        response = await updatePosition(fundInfo.code, positionData);
+        response = await updateHolding(fundInfo.code, holdingData);
       } else {
-        response = await addPosition(positionData);
+        response = await addHolding(holdingData);
       }
 
       if (response.success) {
         // 重新从 API 加载所有数据,确保数据一致性
-        await positionStore.loadAllData();
+        await holdingsStore.loadAllData();
 
         Taro.showToast({
           title: isEditMode ? "更新成功" : "添加成功",
@@ -229,7 +229,7 @@ export default function AddPosition() {
   // 编辑模式下加载现有持仓数据
   useEffect(() => {
     if (isEditMode && initialFundCode) {
-      loadExistingPosition();
+      loadExistingHolding();
     }
   }, [isEditMode, initialFundCode]);
 

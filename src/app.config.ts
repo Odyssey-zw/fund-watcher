@@ -2,11 +2,11 @@ export default defineAppConfig({
   pages: [
     "pages/home/index",
     "pages/fund-list/index",
-    "pages/position/index",
+    "pages/holdings/index",
     "pages/profile/index",
     "pages/index/index",
     "pages/fund-detail/index",
-    "pages/add-position/index",
+    "pages/add-holdings/index",
   ],
   window: {
     navigationStyle: "custom",
@@ -34,10 +34,10 @@ export default defineAppConfig({
         selectedIconPath: "assets/icons/fund-active.png",
       },
       {
-        pagePath: "pages/position/index",
+        pagePath: "pages/holdings/index",
         text: "持仓",
-        iconPath: "assets/icons/position.png",
-        selectedIconPath: "assets/icons/position-active.png",
+        iconPath: "assets/icons/holdings.png",
+        selectedIconPath: "assets/icons/holdings-active.png",
       },
       {
         pagePath: "pages/profile/index",

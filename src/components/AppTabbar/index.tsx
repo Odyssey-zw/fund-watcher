@@ -8,7 +8,7 @@ import { useAppStore } from "~/store/useAppStore";
 const TAB_CONFIG = [
   { key: "home" as TabKey, text: "首页", icon: <HomeOutlined />, path: "/pages/home/index" },
   { key: "fund" as TabKey, text: "基金", icon: <ChartTrendingOutlined />, path: "/pages/fund-list/index" },
-  { key: "position" as TabKey, text: "持仓", icon: <BalanceListOutlined />, path: "/pages/position/index" },
+  { key: "holdings" as TabKey, text: "持仓", icon: <BalanceListOutlined />, path: "/pages/holdings/index" },
   { key: "profile" as TabKey, text: "我的", icon: <UserOutlined />, path: "/pages/profile/index" },
 ];
 

@@ -24,7 +24,7 @@ interface LocalCache {
   };
   privacyAgreed: boolean; // 是否同意隐私政策
   watchedFunds: string[]; // 关注的基金代码列表
-  fundPositions: Array<{
+  fundHoldings: Array<{
     fundCode: string;
     fundName: string;
     shares: number;
@@ -50,7 +50,7 @@ const cache = createCache<RamCache, LocalCache>({
     user: undefined, // 默认没有用户信息
     privacyAgreed: false, // 默认未同意隐私政策
     watchedFunds: [], // 默认无关注基金
-    fundPositions: [], // 默认无持仓
+    fundHoldings: [], // 默认无持仓
   },
 });
 
