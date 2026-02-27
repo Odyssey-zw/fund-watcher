@@ -1,9 +1,9 @@
+import type { TabKey } from "~/store/types";
 import { Tabbar } from "@nutui/nutui-react-taro";
 import { BalanceListOutlined, ChartTrendingOutlined, HomeOutlined, UserOutlined } from "@taroify/icons";
 import Taro from "@tarojs/taro";
 import { GRAY_6, PRIMARY_COLOR } from "~/constants/colors";
 import { useAppStore } from "~/store/useAppStore";
-import type { TabKey } from "~/store/types";
 
 const TAB_CONFIG = [
   { key: "home" as TabKey, text: "首页", icon: <HomeOutlined />, path: "/pages/home/index" },
@@ -33,6 +33,7 @@ export default function AppTabbar() {
       onSwitch={handleSwitch}
       activeColor={PRIMARY_COLOR}
       inactiveColor={GRAY_6}
+      style={{ borderTop: "1px solid #e5e5e5" }}
     >
       {TAB_CONFIG.map(tab => (
         <Tabbar.Item key={tab.key} title={tab.text} icon={tab.icon} />

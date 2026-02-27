@@ -156,7 +156,7 @@ export default function FundListPage() {
   ];
 
   return (
-    <View className="index-page" style={{ height: "100vh", overflow: "hidden" }}>
+    <View className="index-page" style={{ height: "100vh", overflow: "hidden", backgroundColor: "#f5f5f5" }}>
       <View className="index-page__content" style={{ height: "100%", overflow: "auto" }}>
         <PageWrapper title="基金列表" showHeader headerStyle="centered" contentPadding={false}>
           <View className="px-20rpx py-20rpx">

@@ -32,7 +32,6 @@ export const useAppStore = create<AppState>(
     {
       name: "fund-watcher-app",
       partialize: state => ({
-        activeTabKey: state.activeTabKey,
         theme: state.theme,
         isFirstLaunch: state.isFirstLaunch,
         showTabBar: state.showTabBar,
