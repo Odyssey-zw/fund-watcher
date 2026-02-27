@@ -55,22 +55,9 @@ export interface HoldingsState {
 }
 
 /**
- * Tab 标识符
- */
-export type TabKey = "home" | "fund" | "holdings" | "profile";
-
-/**
  * 应用全局状态
  */
 export interface AppState {
-  /** 当前选中的 tab */
-  activeTabKey: TabKey;
-  /** 设置当前 tab */
-  setActiveTabKey: (tab: TabKey) => void;
-  /** 是否显示底部导航栏 */
-  showTabBar: boolean;
-  /** 设置是否显示底部导航栏 */
-  setShowTabBar: (show: boolean) => void;
   /** 应用主题 */
   theme: "light" | "dark";
   /** 设置主题 */

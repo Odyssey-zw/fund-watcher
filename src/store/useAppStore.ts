@@ -8,18 +8,8 @@ import { createTaroPersist } from "./middleware/persist";
 export const useAppStore = create<AppState>(
   createTaroPersist(
     set => ({
-      activeTabKey: "home",
-      showTabBar: true,
       theme: "light",
       isFirstLaunch: true,
-
-      setActiveTabKey: tab => {
-        set({ activeTabKey: tab });
-      },
-
-      setShowTabBar: show => {
-        set({ showTabBar: show });
-      },
 
       setTheme: theme => {
         set({ theme });
@@ -34,7 +24,6 @@ export const useAppStore = create<AppState>(
       partialize: state => ({
         theme: state.theme,
         isFirstLaunch: state.isFirstLaunch,
-        showTabBar: state.showTabBar,
       }),
     },
   ),
