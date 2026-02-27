@@ -17,9 +17,11 @@ export default function AppTabbar() {
 
   const handleSwitch = (index: number) => {
     const tab = TAB_CONFIG[index];
-    if (tab) {
+    if (tab && tab.key !== activeTabKey) {
+      // 先更新状态
       setActiveTabKey(tab.key);
-      Taro.redirectTo({ url: tab.path });
+      // 使用 reLaunch 避免页面栈积累,并且过渡更平滑
+      Taro.reLaunch({ url: tab.path });
     }
   };
 

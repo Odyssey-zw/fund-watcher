@@ -1,18 +1,12 @@
 import { Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useEffect, useState } from "react";
-import AppTabbar from "~/components/AppTabbar";
 import { APP_VERSION } from "~/constants/app";
-import { useAppStore } from "~/store/useAppStore";
 
 export default function HomePage() {
   const [topPadding, setTopPadding] = useState("92rpx"); // 默认值:44px + 48rpx
-  const setActiveTabKey = useAppStore(state => state.setActiveTabKey);
 
   useEffect(() => {
-    // 设置当前 tab
-    setActiveTabKey("home");
-
     // 获取状态栏高度
     try {
       const windowInfo = Taro.getWindowInfo();
@@ -22,7 +16,7 @@ export default function HomePage() {
     } catch (error) {
       console.warn("Failed to get status bar height:", error);
     }
-  }, [setActiveTabKey]);
+  }, []);
 
   return (
     <View className="index-page" style={{ height: "100vh", overflow: "hidden" }}>
@@ -78,7 +72,6 @@ export default function HomePage() {
           </View>
         </View>
       </View>
-      <AppTabbar />
     </View>
   );
 }

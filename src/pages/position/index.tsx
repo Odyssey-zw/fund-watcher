@@ -3,21 +3,14 @@ import { Button, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useEffect, useState } from "react";
 import { deletePosition } from "~/api/position";
-import AppTabbar from "~/components/AppTabbar";
 import PageWrapper from "~/components/page-wrapper";
 import { usePositionStore } from "~/store";
-import { useAppStore } from "~/store/useAppStore";
 import { formatAmount, formatFundValue, formatPercentage, getTrendColorStyle } from "~/utils/fundUtils";
 
 export default function PositionPage() {
   const { positions, summary, loading, loadAllData } = usePositionStore();
   const [sortBy, setSortBy] = useState<"profit" | "profitRate" | "marketValue">("profit");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const setActiveTabKey = useAppStore(state => state.setActiveTabKey);
-
-  useEffect(() => {
-    setActiveTabKey("position");
-  }, [setActiveTabKey]);
 
   const loadData = async () => {
     try {
@@ -137,7 +130,6 @@ export default function PositionPage() {
             </View>
           </PageWrapper>
         </View>
-        <AppTabbar />
       </View>
     );
   }
@@ -223,7 +215,10 @@ export default function PositionPage() {
               <View>
                 {sortedPositions.map(position => (
                   <View key={position.fundCode} className="border-b border-gray-200 bg-white px-30rpx py-24rpx">
-                    <View className="flex cursor-pointer items-center" onClick={() => handleViewDetail(position.fundCode)}>
+                    <View
+                      className="flex cursor-pointer items-center"
+                      onClick={() => handleViewDetail(position.fundCode)}
+                    >
                       <View className="w-200rpx pr-20rpx">
                         <Text className="mb-8rpx block overflow-hidden text-ellipsis whitespace-nowrap text-28rpx text-gray-8 font-500">
                           {position.fundName}
@@ -290,7 +285,6 @@ export default function PositionPage() {
           )}
         </PageWrapper>
       </View>
-      <AppTabbar />
     </View>
   );
 }

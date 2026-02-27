@@ -4,9 +4,7 @@ import { Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getHotFunds } from "~/api/fund";
-import AppTabbar from "~/components/AppTabbar";
 import PageWrapper from "~/components/page-wrapper";
-import { useAppStore } from "~/store/useAppStore";
 import { formatFundValue, formatPercentage } from "~/utils/fundUtils";
 
 const TABS = [
@@ -28,11 +26,6 @@ export default function FundListPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"unitValue" | "estimate" | "return">("return");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const setActiveTabKey = useAppStore(state => state.setActiveTabKey);
-
-  useEffect(() => {
-    setActiveTabKey("fund");
-  }, [setActiveTabKey]);
 
   const loadFunds = useCallback(async (showLoading = true) => {
     try {
@@ -196,7 +189,6 @@ export default function FundListPage() {
           </View>
         </PageWrapper>
       </View>
-      <AppTabbar />
     </View>
   );
 }

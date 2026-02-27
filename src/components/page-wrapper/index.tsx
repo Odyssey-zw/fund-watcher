@@ -42,7 +42,7 @@ export default function PageWrapper({
   enableScroll = true,
 }: PageWrapperProps) {
   const [topSafeHeight, setTopSafeHeight] = useState(0);
-  const [bottomTabBarHeight, setBottomTabBarHeight] = useState(120);
+  const [bottomTabBarHeight] = useState(0); // 使用原生 tabBar，不需要预留空间
 
   useEffect(() => {
     try {
@@ -53,16 +53,9 @@ export default function PageWrapper({
       const statusBarHeight = windowInfo.statusBarHeight ?? windowInfo.safeArea?.top ?? 0;
       const height = statusBarHeight * 2;
       setTopSafeHeight(Math.max(Number(height) || 0, 0));
-
-      // 获取底部安全区域高度
-      const safeBottom = windowInfo.safeArea?.bottom ? windowInfo.screenHeight - windowInfo.safeArea.bottom : 0;
-      const padding = safeBottom * 2 + 12;
-      const totalHeight = padding + 96; // 图标44rpx + 文字22rpx + 间距30rpx
-      setBottomTabBarHeight(totalHeight);
     } catch (error) {
       console.warn("Failed to get safe area height:", error);
       setTopSafeHeight(0);
-      setBottomTabBarHeight(120);
     }
   }, []);
 
