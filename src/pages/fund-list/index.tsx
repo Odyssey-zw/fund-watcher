@@ -104,15 +104,15 @@ export default function FundListPage() {
       width: 200,
       render: (record: FundSearchResult) => (
         <View
-          className="flex flex-col gap-4rpx"
+          className="flex flex-col gap-2rpx"
           onClick={() =>
             Taro.navigateTo({
               url: `/pages/fund-detail/index?code=${record.code}`,
             })
           }
         >
-          <Text className="text-28rpx text-gray-8 font-500">{record.name}</Text>
-          <Text className="text-22rpx text-gray-5">{record.code}</Text>
+          <Text className="text-24rpx text-gray-8 font-500">{record.name}</Text>
+          <Text className="text-20rpx text-gray-5">{record.code}</Text>
         </View>
       ),
     },
@@ -122,9 +122,9 @@ export default function FundListPage() {
       align: "right",
       sorter: true,
       render: (record: FundSearchResult) => (
-        <View className="flex flex-col items-end gap-4rpx">
-          <Text className="text-26rpx font-500">{formatFundValue(record.unitValue ?? 0)}</Text>
-          <Text className="text-22rpx" style={{ color: getTrendColor(record.dayGrowthRate) }}>
+        <View className="flex flex-col items-end gap-2rpx">
+          <Text className="text-24rpx font-500">{formatFundValue(record.unitValue ?? 0)}</Text>
+          <Text className="text-20rpx" style={{ color: getTrendColor(record.dayGrowthRate) }}>
             {record.dayGrowthRate != null ? formatPercentage(record.dayGrowthRate) : "--"}
           </Text>
         </View>
@@ -136,11 +136,11 @@ export default function FundListPage() {
       align: "right",
       sorter: true,
       render: (record: FundSearchResult) => (
-        <View className="flex flex-col items-end gap-4rpx">
-          <Text className="text-26rpx font-500">
+        <View className="flex flex-col items-end gap-2rpx">
+          <Text className="text-24rpx font-500">
             {record.estimateValue != null ? formatFundValue(record.estimateValue) : "--"}
           </Text>
-          <Text className="text-22rpx" style={{ color: getTrendColor(record.estimateChange) }}>
+          <Text className="text-20rpx" style={{ color: getTrendColor(record.estimateChange) }}>
             {record.estimateChange != null ? formatPercentage(record.estimateChange) : "--"}
           </Text>
         </View>
@@ -152,12 +152,12 @@ export default function FundListPage() {
     <View className="index-page" style={{ height: "100vh", overflow: "hidden", backgroundColor: "#f5f5f5" }}>
       <View className="index-page__content" style={{ height: "100%", overflow: "auto" }}>
         <PageWrapper title="基金列表" showHeader headerStyle="centered" contentPadding={false}>
-          <View className="px-20rpx py-20rpx">
-            <View className="mb-20rpx flex gap-20rpx">
+          <View className="px-16rpx py-12rpx">
+            <View className="mb-12rpx flex gap-12rpx">
               {TABS.map(tab => (
                 <View
                   key={tab.key}
-                  className={`cursor-pointer px-24rpx py-12rpx text-28rpx transition-colors ${
+                  className={`cursor-pointer px-20rpx py-8rpx text-26rpx transition-colors ${
                     activeTab === tab.key ? "border-b-2 border-primary-6 font-500 text-primary-6" : "text-gray-6"
                   }`}
                   onClick={() => setActiveTab(tab.key)}
