@@ -62,10 +62,6 @@ export interface AppState {
   theme: "light" | "dark";
   /** 设置主题 */
   setTheme: (theme: "light" | "dark") => void;
-  /** 是否首次启动 */
-  isFirstLaunch: boolean;
-  /** 设置首次启动状态 */
-  setIsFirstLaunch: (isFirst: boolean) => void;
 }
 
 /**
