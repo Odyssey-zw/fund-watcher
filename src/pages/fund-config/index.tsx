@@ -145,6 +145,20 @@ export default function FundConfigPage() {
       <View className="index-page__content" style={{ height: "100%", overflow: "auto" }}>
         <PageWrapper title="基金配置" showHeader showBack headerStyle="centered">
           <View className="mb-16rpx overflow-hidden rd-12rpx bg-white">
+            <View className="px-24rpx py-16rpx text-24rpx text-gray-5">基金设置</View>
+            <Cell
+              title="基金管理"
+              description="管理基金代码列表"
+              align="center"
+              onClick={() => {
+                Taro.navigateTo({
+                  url: "/pages/fund-manage/index",
+                });
+              }}
+            />
+          </View>
+
+          <View className="mb-16rpx overflow-hidden rd-12rpx bg-white">
             <View className="px-24rpx py-16rpx text-24rpx text-gray-5">数据刷新</View>
             <Cell
               title="自动刷新"

@@ -7,6 +7,7 @@ import type { ApiResponse, PaginationParams, PaginationResult } from "~/types/co
 import type { FundChartData, FundChartPeriod, FundDetailPage, FundSearchResult } from "~/types/fund";
 import Taro from "@tarojs/taro";
 import { FUND_API_URLS, HOT_FUND_CODES } from "~/constants/fund";
+import { useFundCodesStore } from "~/store/useFundCodesStore";
 import { getSinaFundData } from "./fund-internal";
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -56,8 +57,12 @@ export async function getHotFunds(params: PaginationParams): Promise<ApiResponse
       console.log("[API] 开始获取热门基金数据...");
     }
 
+    // 从 store 获取自定义基金代码列表，如果为空则使用默认列表
+    const customFundCodes = useFundCodesStore.getState().getFundCodes();
+    const fundCodesToFetch = customFundCodes.length > 0 ? customFundCodes : Array.from(HOT_FUND_CODES);
+
     // 批量获取基金数据
-    const fundPromises = HOT_FUND_CODES.map(code => getSinaFundData(code));
+    const fundPromises = fundCodesToFetch.map(code => getSinaFundData(code));
     const sinaDataList = await Promise.all(fundPromises);
 
     // 转换为 FundSearchResult 格式

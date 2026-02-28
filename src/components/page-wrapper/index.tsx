@@ -103,7 +103,7 @@ export default function PageWrapper({
             {/* 返回按钮 */}
             {showBack && (
               <View
-                className="pa left-30rpx flex items-center justify-center cursor-pointer"
+                className="pa left-30rpx flex cursor-pointer items-center justify-center"
                 onClick={() => Taro.navigateBack()}
               >
                 <Text className="text-40rpx text-gray-7">←</Text>

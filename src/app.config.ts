@@ -8,6 +8,7 @@ export default defineAppConfig({
     "pages/fund-detail/index",
     "pages/add-holdings/index",
     "pages/fund-config/index",
+    "pages/fund-manage/index",
   ],
   window: {
     navigationStyle: "custom",
