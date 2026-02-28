@@ -68,6 +68,16 @@ export default function ProfilePage() {
           </View>
 
           <View className="overflow-hidden rd-12rpx bg-white">
+            <Cell
+              title="基金配置"
+              description="刷新间隔、显示设置等"
+              align="center"
+              onClick={() => {
+                Taro.navigateTo({
+                  url: "/pages/fund-config/index",
+                });
+              }}
+            />
             <Cell title="通用设置" description="主题、语言、通知等" align="center" onClick={handleSettings} />
             <Cell
               title="清除缓存"

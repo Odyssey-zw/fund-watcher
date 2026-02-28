@@ -23,6 +23,7 @@ export function usePageLayout() {
 interface PageWrapperProps {
   title?: string;
   showHeader?: boolean;
+  showBack?: boolean; // 是否显示返回按钮
   headerStyle?: "default" | "centered";
   children: React.ReactNode;
   className?: string;
@@ -34,6 +35,7 @@ interface PageWrapperProps {
 export default function PageWrapper({
   title,
   showHeader = false,
+  showBack = false,
   headerStyle = "centered",
   children,
   className = "",
@@ -98,6 +100,17 @@ export default function PageWrapper({
               paddingRight: "env(safe-area-inset-right, 0px)",
             }}
           >
+            {/* 返回按钮 */}
+            {showBack && (
+              <View
+                className="pa left-30rpx flex items-center justify-center cursor-pointer"
+                onClick={() => Taro.navigateBack()}
+              >
+                <Text className="text-40rpx text-gray-7">←</Text>
+              </View>
+            )}
+
+            {/* 标题 */}
             <Text className="flex items-center justify-center text-36rpx text-gray-8 font-600 leading-none">
               {title}
             </Text>
