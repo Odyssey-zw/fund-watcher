@@ -98,3 +98,5 @@ dist
 
 # Local development
 .claude
+
+temp/
