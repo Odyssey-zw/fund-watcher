@@ -196,21 +196,6 @@ export default function MarketPage() {
                                 </View>
                               ))}
                             </View>
-                            {item.docurl ? (
-                              <View
-                                className="ml-12rpx inline-flex items-center"
-                                onClick={() => {
-                                  Taro.setClipboardData({
-                                    data: item.docurl!,
-                                    success: () => {
-                                      Taro.showToast({ title: "原文链接已复制", icon: "none" });
-                                    },
-                                  });
-                                }}
-                              >
-                                <Text className="text-22rpx text-blue-500 underline">查看原文（复制链接）</Text>
-                              </View>
-                            ) : null}
                           </View>
                         ) : null}
                       </View>
