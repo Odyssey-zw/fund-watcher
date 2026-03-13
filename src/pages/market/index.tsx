@@ -178,9 +178,9 @@ export default function MarketPage() {
                       </View>
                       <View className="flex-1">
                         <Ellipsis
-                          className="text-22rpx text-gray-8 leading-relaxed"
+                          className="text-24rpx text-gray-8 leading-relaxed"
                           content={item.rich_text || ""}
-                          rows={3}
+                          rows={10}
                           expandText="更多"
                           collapseText="收起"
                         />
