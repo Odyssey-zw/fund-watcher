@@ -1,4 +1,3 @@
-import { Ellipsis } from "@nutui/nutui-react-taro";
 import { Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useEffect, useState } from "react";
@@ -177,13 +176,7 @@ export default function MarketPage() {
                         </Text>
                       </View>
                       <View className="flex-1">
-                        <Ellipsis
-                          className="text-24rpx text-gray-8 leading-relaxed"
-                          content={item.rich_text || ""}
-                          rows={10}
-                          expandText="更多"
-                          collapseText="收起"
-                        />
+                        <Text className="text-24rpx text-gray-8 leading-relaxed">{item.rich_text}</Text>
                         {(item.tag && item.tag.length > 0) || item.docurl ? (
                           <View className="mt-6rpx flex items-center justify-between">
                             <View className="flex flex-wrap items-center gap-6rpx">
