@@ -15,6 +15,17 @@ import "./app.scss";
 import "event-target-polyfill";
 import "yet-another-abortcontroller-polyfill";
 
+// H5 环境启用 vConsole（小程序端仍不启用）
+if (process.env.TARO_ENV === "h5") {
+  if (typeof window !== "undefined" && !(window as any).__VCONSOLE__) {
+    // 动态按需加载 vConsole，避免 TS 对 require 报错
+    void import("vconsole").then(mod => {
+      const VConsole = (mod as any).default || (mod as any);
+      (window as any).__VCONSOLE__ = new VConsole();
+    });
+  }
+}
+
 function App({ children }: PropsWithChildren<any>) {
   const launchOptions = useLaunchOptions();
 
