@@ -16,13 +16,13 @@ export function createTaroPersist<T>(config: StateCreator<T>, options: PersistOp
   return (set: StoreApi<T>["setState"], get: StoreApi<T>["getState"], api: StoreApi<T>): T => {
     const { name, partialize } = options;
 
-    // 从 Storage 恢复状态
+    // 从 Storage 恢复状态（只覆盖数据字段，不替换整个 state，避免丢失方法）
     const restoreState = async () => {
       try {
         const storedValue = await Taro.getStorage({ key: name });
         if (storedValue.data) {
           const state = typeof storedValue.data === "string" ? JSON.parse(storedValue.data) : storedValue.data;
-          set(state, true);
+          set(prev => Object.assign({}, prev, state), false);
         }
       } catch (error) {
         console.warn(`Failed to restore state from ${name}:`, error);
