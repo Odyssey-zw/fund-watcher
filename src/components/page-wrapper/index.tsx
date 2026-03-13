@@ -1,3 +1,4 @@
+import { BackTop } from "@nutui/nutui-react-taro";
 import { ScrollView, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -45,6 +46,8 @@ export default function PageWrapper({
 }: PageWrapperProps) {
   const [topSafeHeight, setTopSafeHeight] = useState(0);
   const [bottomTabBarHeight] = useState(0); // 使用原生 tabBar，不需要预留空间
+  const [scrollRes, setScrollRes] = useState<any>(null);
+  const [scrollTop, setScrollTop] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     try {
@@ -127,7 +130,17 @@ export default function PageWrapper({
           }}
         >
           {enableScroll ? (
-            <ScrollView className="box-border h-full w-full" scrollY>
+            <ScrollView
+              className="box-border h-full w-full"
+              scrollY
+              scrollTop={scrollTop}
+              onScroll={res => {
+                setScrollRes(res.detail);
+                if (scrollTop !== undefined && (res.detail?.scrollTop ?? 0) === 0) {
+                  setScrollTop(undefined);
+                }
+              }}
+            >
               <View className={`box-border ${contentPadding ? "p-30rpx" : "p-0"}`}>{children}</View>
             </ScrollView>
           ) : (
@@ -135,6 +148,12 @@ export default function PageWrapper({
               {children}
             </View>
           )}
+          <BackTop
+            scrollRes={scrollRes}
+            onClick={() => {
+              setScrollTop(0);
+            }}
+          />
         </View>
       </View>
     </PageLayoutContext.Provider>

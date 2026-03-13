@@ -1,5 +1,6 @@
 export default defineAppConfig({
   pages: [
+    "pages/market/index",
     "pages/fund-list/index",
     "pages/home/index",
     "pages/holdings/index",
@@ -28,6 +29,12 @@ export default defineAppConfig({
         text: "首页",
         iconPath: "assets/icons/home.png",
         selectedIconPath: "assets/icons/home-active.png",
+      },
+      {
+        pagePath: "pages/market/index",
+        text: "行情",
+        iconPath: "assets/icons/market.png",
+        selectedIconPath: "assets/icons/market-active.png",
       },
       {
         pagePath: "pages/fund-list/index",
