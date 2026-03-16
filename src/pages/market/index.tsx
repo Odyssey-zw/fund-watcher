@@ -25,7 +25,7 @@ interface SinaLiveResponse {
 // 新浪财经 7x24 小时直播电报流（财经直播间 ID 152）
 // 注意：接口为 JSONP，我们在小程序里请求时 dataType 使用 "text"，手动去掉回调包装再解析。
 const SINA_LIVE_URL =
-  "https://zhibo.sina.com.cn/api/zhibo/feed?page=1&page_size=50&zhibo_id=152&tag_id=0&dire=f&dpc=1&type=0";
+  "https://zhibo.sina.com.cn/api/zhibo/feed?page=1&page_size=100&zhibo_id=152&tag_id=0&dire=f&dpc=1&type=0";
 
 function formatDateTime(timestampMs: number) {
   const date = new Date(timestampMs);
