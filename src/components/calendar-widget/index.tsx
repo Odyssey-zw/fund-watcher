@@ -8,7 +8,7 @@ import { CalendarCard } from "@nutui/nutui-react-taro";
 import { useQuery } from "@tanstack/react-query";
 import { Text, View } from "@tarojs/components";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { getCalendarEvents } from "~/api/calendar";
 
 /**
@@ -48,15 +48,18 @@ interface CalendarWidgetProps {
 }
 
 export default function CalendarWidget({ showDetails = true }: CalendarWidgetProps) {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [currentMonth, setCurrentMonth] = useState(dayjs());
+  const today = useMemo(() => dayjs(), []);
+
+  const [selectedDate, setSelectedDate] = useState<Date>(today.toDate());
+  const [currentMonth, setCurrentMonth] = useState(today.month());
+  const calendarRef = useRef<any>(null);
 
   // 获取当月所有事件
   const { data: eventsResponse, isLoading } = useQuery({
-    queryKey: ["calendar", currentMonth.format("YYYY-MM")],
+    queryKey: ["calendar", `${currentMonth}-${today.year()}`],
     queryFn: () => {
-      const start = currentMonth.startOf("month").format("YYYY-MM-DD");
-      const end = currentMonth.endOf("month").format("YYYY-MM-DD");
+      const start = dayjs(`${today.year()}-${String(currentMonth).padStart(2, "0")}-01`).format("YYYY-MM-DD");
+      const end = dayjs(`${today.year()}-${String(currentMonth + 1).padStart(2, "0")}-01`).format("YYYY-MM-DD");
       return getCalendarEvents(start, end);
     },
     staleTime: 5 * 60 * 1000,
@@ -83,8 +86,8 @@ export default function CalendarWidget({ showDetails = true }: CalendarWidgetPro
 
   // 根据日数据构造完整日期字符串
   const getDayFullDate = (day: CalendarCardDay) => {
-    const year = day.year ?? currentMonth.year();
-    const month = day.month ?? currentMonth.month() + 1;
+    const year = day.year ?? today.year();
+    const month = day.month ?? today.month() + 1;
     const dayNum = day.date;
     return dayjs(`${year}-${String(month).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`).format("YYYY-MM-DD");
   };
@@ -97,11 +100,20 @@ export default function CalendarWidget({ showDetails = true }: CalendarWidgetPro
   };
 
   // 处理页面改变（左右切换月份）
-  const handlePageChange = (month: CalendarCardMonth) => {
-    const newMonth = dayjs(`${month.year}-${String(month.month).padStart(2, "0")}-01`);
-    setCurrentMonth(newMonth);
-    // 同步选中日期到当前月份，避免受控 value 阻止面板切换
-    setSelectedDate(newMonth.toDate());
+  const handlePageChange = (val: CalendarCardMonth) => {
+    setCurrentMonth(val.month);
+    // 同步选中日期到当前面板月份，避免因受控 value 导致面板“回弹”到原月份
+    const newMonthDate = dayjs(`${val.year}-${String(val.month).padStart(2, "0")}-01`).toDate();
+    setSelectedDate(newMonthDate);
+  };
+
+  // 回到今天
+  const handleBackToToday = () => {
+    const now = dayjs();
+    setSelectedDate(now.toDate());
+    setCurrentMonth(now.month());
+    // 同步日历面板显示的月份
+    calendarRef.current?.jumpTo(now.year(), now.month() + 1);
   };
 
   // 自定义日期渲染 - 显示日期数字 + 事件标记
@@ -141,10 +153,15 @@ export default function CalendarWidget({ showDetails = true }: CalendarWidgetPro
 
   return (
     <View className="rounded-24rpx bg-white/95 p-40rpx shadow-lg">
-      {/* 标题 */}
-      <View className="mb-30rpx flex items-center">
-        <Text className="mr-10rpx text-32rpx">📅</Text>
-        <Text className="text-32rpx text-gray-8 font-bold">投资日历</Text>
+      {/* 标题 + 回到今天 */}
+      <View className="mb-30rpx flex items-center justify-between">
+        <View className="flex items-center">
+          <Text className="mr-10rpx text-32rpx">📅</Text>
+          <Text className="text-32rpx text-gray-8 font-bold">投资日历</Text>
+        </View>
+        <Text className="rounded-full bg-blue-1 px-20rpx py-8rpx text-22rpx text-blue-6" onClick={handleBackToToday}>
+          回到今天
+        </Text>
       </View>
 
       {/* 日历组件 */}
@@ -155,6 +172,7 @@ export default function CalendarWidget({ showDetails = true }: CalendarWidgetPro
       ) : (
         <>
           <CalendarCard
+            ref={calendarRef}
             type="single"
             value={selectedDate}
             onDayClick={handleDayClick}
