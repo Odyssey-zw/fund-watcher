@@ -28,6 +28,18 @@ function getImportanceTag(importance: ImportanceLevel): string {
 }
 
 /**
+ * 国内部分固定日期法定节假日（公历）
+ * 春节、清明、端午、中秋等农历或滚动假期这里不处理，只做简单高亮
+ */
+const CHINA_FIXED_HOLIDAYS = [
+  { month: 1, day: 1 }, // 元旦
+  { month: 5, day: 1 }, // 劳动节
+  { month: 10, day: 1 }, // 国庆节
+  { month: 10, day: 2 },
+  { month: 10, day: 3 },
+];
+
+/**
  * 财经日历组件属性
  */
 interface CalendarWidgetProps {
@@ -97,6 +109,9 @@ export default function CalendarWidget({ showDetails = true }: CalendarWidgetPro
     const dateStr = getDayFullDate(day);
     const dayEvents = eventsByDate[dateStr] || [];
     const dayNumber = day.date;
+    const weekday = dayjs(dateStr).day(); // 0-周日, 6-周六
+    const isWeekend = weekday === 0 || weekday === 6;
+    const isHoliday = CHINA_FIXED_HOLIDAYS.some(h => h.month === day.month && h.day === day.date);
     const isSelected = dateStr === selectedDateStr;
 
     let highestImportance: ImportanceLevel | null = null;
@@ -109,10 +124,12 @@ export default function CalendarWidget({ showDetails = true }: CalendarWidgetPro
       }, "low" as ImportanceLevel);
     }
 
+    const baseTextColor = isSelected ? "text-white" : isWeekend || isHoliday ? "text-red-5" : "text-gray-8";
+
     return (
       <View className="h-full w-full flex flex-col items-center justify-center">
         {/* 日期数字：统一高度 */}
-        <Text className={`text-26rpx ${isSelected ? "text-white" : "text-gray-8"}`}>{dayNumber}</Text>
+        <Text className={`text-26rpx ${baseTextColor}`}>{dayNumber}</Text>
 
         {/* 事件标记：始终预留一行高度，仅在有事件时显示图标 */}
         <View className="mt-4rpx h-22rpx flex items-center justify-center">
