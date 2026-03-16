@@ -10,10 +10,17 @@ export interface FundCodeItem {
   code: string;
   name?: string; // 基金名称，首次添加时可能为空，后续获取
   addTime: number; // 添加时间戳
+  tagKeys?: string[]; // 关联的多个标签 key
+}
+
+export interface FundTagItem {
+  key: string;
+  value: string;
 }
 
 interface FundCodesState {
   fundCodes: FundCodeItem[];
+  tags: FundTagItem[];
 
   // 获取所有基金代码（仅代码字符串数组）
   getFundCodes: () => string[];
@@ -30,11 +37,20 @@ interface FundCodesState {
   // 更新基金名称
   updateFundName: (code: string, name: string) => void;
 
+  // 更新基金标签（支持多个）
+  updateFundTags: (code: string, tagKeys: string[]) => void;
+
   // 重置为默认列表
   resetToDefault: () => void;
 
   // 检查基金代码是否存在
   hasFundCode: (code: string) => boolean;
+
+  // 标签相关
+  addTag: (tag: FundTagItem) => void;
+  updateTag: (oldKey: string, tag: FundTagItem) => void;
+  removeTag: (key: string) => void;
+  hasTagKey: (key: string) => boolean;
 }
 
 function getDefaultFundCodes(): FundCodeItem[] {
@@ -42,6 +58,7 @@ function getDefaultFundCodes(): FundCodeItem[] {
     code,
     name: undefined,
     addTime: Date.now(),
+    tagKeys: [],
   }));
 }
 
@@ -49,6 +66,7 @@ export const useFundCodesStore = create<FundCodesState>(
   createTaroPersist(
     (set, get) => ({
       fundCodes: getDefaultFundCodes(),
+      tags: [],
 
       getFundCodes: () => {
         return get().fundCodes.map(item => item.code);
@@ -69,6 +87,7 @@ export const useFundCodesStore = create<FundCodesState>(
                 code,
                 name,
                 addTime: Date.now(),
+                tagKeys: [],
               },
             ],
           };
@@ -84,6 +103,7 @@ export const useFundCodesStore = create<FundCodesState>(
               code,
               name: undefined,
               addTime: Date.now(),
+              tagKeys: [],
             }));
 
           if (newItems.length === 0) {
@@ -108,6 +128,12 @@ export const useFundCodesStore = create<FundCodesState>(
         }));
       },
 
+      updateFundTags: (code, tagKeys) => {
+        set(state => ({
+          fundCodes: state.fundCodes.map(item => (item.code === code ? { ...item, tagKeys } : item)),
+        }));
+      },
+
       resetToDefault: () => {
         set({
           fundCodes: getDefaultFundCodes(),
@@ -116,6 +142,41 @@ export const useFundCodesStore = create<FundCodesState>(
 
       hasFundCode: code => {
         return get().fundCodes.some(item => item.code === code);
+      },
+
+      addTag: tag => {
+        set(state => {
+          if (state.tags.some(t => t.key === tag.key)) {
+            console.warn(`标签 key ${tag.key} 已存在`);
+            return state;
+          }
+          return { tags: [...state.tags, tag] };
+        });
+      },
+
+      updateTag: (oldKey, tag) => {
+        set(state => ({
+          tags: state.tags.map(t => (t.key === oldKey ? tag : t)),
+          fundCodes:
+            oldKey === tag.key
+              ? state.fundCodes
+              : state.fundCodes.map(f =>
+                  f.tagKeys?.includes(oldKey) ? { ...f, tagKeys: f.tagKeys.map(k => (k === oldKey ? tag.key : k)) } : f,
+                ),
+        }));
+      },
+
+      removeTag: key => {
+        set(state => ({
+          tags: state.tags.filter(t => t.key !== key),
+          fundCodes: state.fundCodes.map(f =>
+            f.tagKeys?.includes(key) ? { ...f, tagKeys: f.tagKeys.filter(k => k !== key) } : f,
+          ),
+        }));
+      },
+
+      hasTagKey: key => {
+        return get().tags.some(t => t.key === key);
       },
     }),
     {

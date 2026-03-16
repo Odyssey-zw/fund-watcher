@@ -1,5 +1,6 @@
 export default defineAppConfig({
   pages: [
+    "pages/fund-manage/index",
     "pages/home/index",
     "pages/market/index",
     "pages/fund-list/index",
@@ -9,7 +10,6 @@ export default defineAppConfig({
     "pages/fund-detail/index",
     "pages/add-holdings/index",
     "pages/fund-config/index",
-    "pages/fund-manage/index",
   ],
   window: {
     navigationStyle: "custom",
