@@ -41,16 +41,3 @@ export interface CalendarEvent {
   /** 数据来源 */
   source?: string;
 }
-
-/**
- * 财联社日历事件（原始数据格式）
- */
-export interface ClsCalendarEvent {
-  id: string | number;
-  title: string;
-  date: string;
-  time?: string;
-  content?: string;
-  importance?: number; // 1-低 2-中 3-高
-  [key: string]: any;
-}

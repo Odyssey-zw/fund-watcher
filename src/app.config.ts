@@ -1,8 +1,8 @@
 export default defineAppConfig({
   pages: [
+    "pages/home/index",
     "pages/market/index",
     "pages/fund-list/index",
-    "pages/home/index",
     "pages/holdings/index",
     "pages/profile/index",
     "pages/index/index",

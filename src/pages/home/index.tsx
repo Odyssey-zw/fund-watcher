@@ -44,7 +44,7 @@ export default function HomePage() {
             </View>
 
             <View className="mt-50rpx">
-              <CalendarWidget maxEvents={5} />
+              <CalendarWidget showDetails />
             </View>
 
             <View className="pb-32rpx pt-40rpx text-center">

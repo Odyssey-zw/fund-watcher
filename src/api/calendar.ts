@@ -1,102 +1,178 @@
 /**
  * 财经日历 API
+ * 使用预定义财经事件数据
  */
 
-import type { CalendarEvent, ClsCalendarEvent, ImportanceLevel } from "~/types/calendar";
+import type { CalendarEvent } from "~/types/calendar";
 import type { ApiResponse } from "~/types/common";
-import Taro from "@tarojs/taro";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+// 扩展 dayjs 插件
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const isDev = process.env.NODE_ENV !== "production";
 
 /**
- * 财联社财经日历接口
- * 注意：由于跨域限制，在小程序中可能需要配置服务器域名白名单
- * 或通过后端代理
+ * 预定义的重要财经事件（按月份）
+ * 这些是相对固定的重要经济数据/事件的常规发布时间
  */
-const CLS_CALENDAR_API = "https://www.cls.cn/api/calendar/web/list";
+const PREDEFINED_EVENTS = [
+  // 每月上旬（1-10日）
+  {
+    day: 1,
+    title: "官方制造业PMI",
+    time: "09:00",
+    importance: "high" as const,
+    description: "采购经理人指数，反映制造业景气度，属于先行指标",
+  },
+  {
+    day: 1,
+    title: "非制造业PMI",
+    time: "09:00",
+    importance: "medium" as const,
+    description: "服务业与建筑业景气度指标，反映内需情况",
+  },
+  {
+    day: 5,
+    title: "财新中国制造业PMI",
+    time: "09:45",
+    importance: "medium" as const,
+    description: "偏向中小企业的制造业景气度指标",
+  },
+  {
+    day: 9,
+    title: "中国CPI数据",
+    time: "09:30",
+    importance: "high" as const,
+    description: "居民消费价格指数，反映通胀水平，影响货币政策预期",
+  },
+  {
+    day: 9,
+    title: "中国PPI数据",
+    time: "09:30",
+    importance: "high" as const,
+    description: "工业品出厂价格指数，反映上游价格变化及企业盈利压力",
+  },
+
+  // 每月中旬（11-20日）
+  {
+    day: 15,
+    title: "社会融资规模数据",
+    time: "10:00",
+    importance: "medium" as const,
+    description: "反映金融对实体经济的支持力度，是信用周期的重要参考",
+  },
+  {
+    day: 15,
+    title: "新增人民币贷款",
+    time: "10:00",
+    importance: "medium" as const,
+    description: "银行信贷投放情况，体现资金宽松或收紧程度",
+  },
+  {
+    day: 16,
+    title: "房地产投资数据",
+    time: "10:00",
+    importance: "medium" as const,
+    description: "房地产开发投资及销售情况，影响地产链与相关行业",
+  },
+  {
+    day: 17,
+    title: "规模以上工业增加值",
+    time: "10:00",
+    importance: "high" as const,
+    description: "工业生产景气度指标，对周期板块和大宗商品影响较大",
+  },
+  {
+    day: 17,
+    title: "社会消费品零售总额",
+    time: "10:00",
+    importance: "high" as const,
+    description: "消费景气度核心指标，影响可选消费与必选消费板块",
+  },
+  {
+    day: 18,
+    title: "城镇固定资产投资",
+    time: "10:00",
+    importance: "medium" as const,
+    description: "反映基建、制造业、地产等领域的投资力度",
+  },
+
+  // 每月末（21-31日）
+  {
+    day: 20,
+    title: "一年期LPR报价",
+    time: "09:15",
+    importance: "high" as const,
+    description: "贷款市场报价利率，影响企业与居民贷款利率定价",
+  },
+  {
+    day: 20,
+    title: "五年期以上LPR报价",
+    time: "09:15",
+    importance: "high" as const,
+    description: "中长期贷款及房贷定价基准，影响房地产与银行板块",
+  },
+  {
+    day: 25,
+    title: "财新中国服务业PMI",
+    time: "09:45",
+    importance: "medium" as const,
+    description: "反映服务业活动状况，侧重私营与中小企业",
+  },
+  {
+    day: 28,
+    title: "规模以上工业企业利润",
+    time: "09:30",
+    importance: "medium" as const,
+    description: "反映工业企业盈利情况，与股市盈利预期高度相关",
+  },
+];
 
 /**
- * 转换重要程度
+ * 生成当前月份的财经日历事件
  */
-function convertImportance(importance?: number): ImportanceLevel {
-  if (!importance) {
-    return "low";
-  }
-  if (importance >= 3) {
-    return "high";
-  }
-  if (importance >= 2) {
-    return "medium";
-  }
-  return "low";
-}
+function generateMonthlyEvents(targetDate: string = dayjs().format("YYYY-MM-DD")): CalendarEvent[] {
+  const date = dayjs(targetDate);
+  const year = date.year();
+  const month = date.month() + 1; // dayjs month 从 0 开始
+  const daysInMonth = date.daysInMonth();
 
-/**
- * 转换财联社事件为标准格式
- */
-function convertClsEvent(clsEvent: ClsCalendarEvent): CalendarEvent {
-  return {
-    id: String(clsEvent.id),
-    title: clsEvent.title || "未知事件",
-    date: clsEvent.date || dayjs().format("YYYY-MM-DD"),
-    time: clsEvent.time,
-    type: "economic", // 默认为经济数据
-    importance: convertImportance(clsEvent.importance),
-    description: clsEvent.content,
-    source: "财联社",
-  };
-}
-
-/**
- * 生成模拟财经日历数据（用于开发和测试）
- */
-function generateMockCalendarData(): CalendarEvent[] {
-  const today = dayjs();
   const events: CalendarEvent[] = [];
 
-  // 本周的模拟事件
-  for (let i = 0; i < 7; i++) {
-    const date = today.add(i, "day");
-    const dateStr = date.format("YYYY-MM-DD");
-
-    // 每天添加 1-3 个随机事件
-    const eventCount = Math.floor(Math.random() * 3) + 1;
-
-    for (let j = 0; j < eventCount; j++) {
-      const eventTypes = [
-        { title: "中国CPI数据", type: "economic" as const, importance: "high" as const },
-        { title: "美联储议息会议", type: "policy" as const, importance: "high" as const },
-        { title: "GDP数据发布", type: "economic" as const, importance: "high" as const },
-        { title: "PMI数据", type: "economic" as const, importance: "medium" as const },
-        { title: "央行公开市场操作", type: "policy" as const, importance: "medium" as const },
-        { title: "重点公司财报", type: "earnings" as const, importance: "medium" as const },
-        { title: "市场休市", type: "holiday" as const, importance: "low" as const },
-      ];
-
-      const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-
+  PREDEFINED_EVENTS.forEach(event => {
+    // 只生成该月实际存在的日期
+    if (event.day <= daysInMonth) {
+      const eventDate = dayjs(`${year}-${String(month).padStart(2, "0")}-${String(event.day).padStart(2, "0")}`);
       events.push({
-        id: `${dateStr}-${j}`,
-        title: randomEvent.title,
-        date: dateStr,
-        time: `${9 + j * 2}:30`,
-        type: randomEvent.type,
-        importance: randomEvent.importance,
-        description: `${randomEvent.title}的详细说明信息`,
-        previous: randomEvent.type === "economic" ? "2.5%" : undefined,
-        forecast: randomEvent.type === "economic" ? "2.8%" : undefined,
-        source: "模拟数据",
+        id: `${eventDate.format("YYYY-MM-DD")}-${event.title}`,
+        title: event.title,
+        date: eventDate.format("YYYY-MM-DD"),
+        time: event.time,
+        type: "economic",
+        importance: event.importance,
+        description: event.description,
+        source: "预设事件",
       });
     }
-  }
+  });
 
-  return events.sort((a, b) => {
-    const dateCompare = a.date.localeCompare(b.date);
-    if (dateCompare !== 0) {
-      return dateCompare;
-    }
-    return (a.time || "").localeCompare(b.time || "");
+  return events;
+}
+
+/**
+ * 过滤指定日期范围的事件
+ */
+function filterEventsByDateRange(events: CalendarEvent[], startDate: string, endDate: string): CalendarEvent[] {
+  const start = dayjs(startDate);
+  const end = dayjs(endDate);
+
+  return events.filter(event => {
+    const eventDate = dayjs(event.date);
+    return eventDate.isSameOrAfter(start, "day") && eventDate.isSameOrBefore(end, "day");
   });
 }
 
@@ -116,68 +192,33 @@ export async function getCalendarEvents(startDate?: string, endDate?: string): P
       console.log(`[API] 获取财经日历数据: ${start} ~ ${end}`);
     }
 
-    // 由于财联社接口可能存在跨域或权限问题
-    // 这里先使用模拟数据，实际使用时可切换到真实接口
-    const USE_MOCK_DATA = true;
+    // 生成本月和下月的事件（覆盖未来7天）
+    const startMonth = dayjs(start);
+    const endMonth = dayjs(end);
 
-    if (USE_MOCK_DATA) {
-      const mockData = generateMockCalendarData();
-      return {
-        code: 200,
-        message: "success",
-        success: true,
-        data: mockData,
-      };
+    let allEvents: CalendarEvent[] = [];
+
+    // 生成开始月份的事件
+    allEvents = allEvents.concat(generateMonthlyEvents(start));
+
+    // 如果跨月，生成结束月份的事件
+    if (startMonth.month() !== endMonth.month()) {
+      allEvents = allEvents.concat(generateMonthlyEvents(end));
     }
 
-    // 真实 API 调用（需要配置域名白名单或后端代理）
-    try {
-      const response = await Taro.request<{
-        code: number;
-        data: ClsCalendarEvent[];
-        [key: string]: any;
-      }>({
-        url: CLS_CALENDAR_API,
-        method: "GET",
-        data: {
-          app: "CailianpressWeb",
-          flag: 0,
-          os: "web",
-          sv: "8.4.6",
-          type: 0,
-          startDate: start,
-          endDate: end,
-        },
-        header: {
-          "content-type": "application/json",
-        },
-      });
+    // 过滤出指定日期范围内的事件
+    const filteredEvents = filterEventsByDateRange(allEvents, start, end);
 
-      if (response.statusCode === 200 && response.data?.data) {
-        const events = response.data.data.map(convertClsEvent);
-        if (isDev) {
-          console.log(`[API] 成功获取 ${events.length} 条财经日历数据`);
-        }
-        return {
-          code: 200,
-          message: "success",
-          success: true,
-          data: events,
-        };
-      }
-
-      throw new Error("获取数据失败");
-    } catch (error) {
-      console.warn("财联社接口调用失败，使用模拟数据:", error);
-      // 接口失败时降级使用模拟数据
-      const mockData = generateMockCalendarData();
-      return {
-        code: 200,
-        message: "success (mock data)",
-        success: true,
-        data: mockData,
-      };
+    if (isDev) {
+      console.log(`[API] 成功生成 ${filteredEvents.length} 条财经日历数据`);
     }
+
+    return {
+      code: 200,
+      message: "success",
+      success: true,
+      data: filteredEvents,
+    };
   } catch (error) {
     console.error("获取财经日历数据失败:", error);
     return {

@@ -1,4 +1,4 @@
-import { defineConfig, presetAttributify, presetIcons, transformerDirectives, transformerVariantGroup } from "unocss";
+import { defineConfig, presetAttributify, presetIcons, transformerVariantGroup } from "unocss";
 import {
   presetApplet,
   presetRemRpx,
